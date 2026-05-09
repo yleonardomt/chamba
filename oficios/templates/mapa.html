@@ -1,0 +1,481 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de profesionales - CHAMBA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{% static 'css/principal.css' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Quitar bordes feos de Leaflet */
+        .leaflet-div-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 1rem !important;
+        }
+
+        .leaflet-popup-tip {
+            background: white !important;
+        }
+
+        .mapa-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .mapa-header {
+            background: linear-gradient(135deg, #0A66C2 0%, #004182 100%);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            text-align: center;
+        }
+
+        .mapa-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .mapa-header p {
+            font-size: 1.2rem;
+        }
+
+        .mapa-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 2rem;
+        }
+
+        .filtros-panel {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 8rem;
+            height: fit-content;
+        }
+
+        .filtros-titulo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0A66C2;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #E5E7EB;
+            padding-bottom: 0.8rem;
+        }
+
+        .filtro-grupo {
+            margin-bottom: 1.5rem;
+        }
+
+        .filtro-label {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .filtro-botones {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .filtro-btn {
+            padding: 0.7rem 1rem;
+            border-radius: 0.8rem;
+            border: 1px solid #E5E7EB;
+            background: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .filtro-btn i {
+            width: 1.5rem;
+        }
+
+        .filtro-btn.active {
+            background: #0A66C2;
+            color: white;
+        }
+
+        .filtro-btn.active i {
+            color: white;
+        }
+
+        .resultados-lista {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-height: 550px;
+            overflow-y: auto;
+        }
+
+        .resultado-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #F3F4F6;
+            cursor: pointer;
+            border-radius: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .resultado-item:hover {
+            background: #F9FAFB;
+            transform: translateX(3px);
+        }
+
+        .resultado-avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .resultado-info {
+            flex: 1;
+        }
+
+        .resultado-nombre {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .resultado-oficio {
+            font-size: 0.8rem;
+            color: #6B7280;
+        }
+
+        .resultado-rating {
+            font-size: 0.75rem;
+            color: #F59E0B;
+            margin-top: 0.2rem;
+        }
+
+        .resultado-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            font-weight: 600;
+        }
+
+        .badge-trabajador {
+            background: #E8F0FE;
+            color: #0A66C2;
+        }
+
+        .badge-empleador {
+            background: #F3E8FF;
+            color: #9333EA;
+        }
+
+        #map {
+            height: 550px;
+            border-radius: 1.5rem;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .stats-mapa {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-mapa {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 900px) {
+            .mapa-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #map {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body class="chamba-dashboard">
+    {% include 'includes/navbar.html' %}
+
+    <div class="mapa-container">
+        <div class="mapa-header">
+            <h1><i class="fa-solid fa-map-location-dot"></i> Mapa de profesionales</h1>
+            <p>Encuentra trabajadores y empleadores cerca de tu ubicación</p>
+            <div class="stats-mapa">
+                <div class="stat-mapa" id="stats-trabajadores"> Cargando...</div>
+                <div class="stat-mapa" id="stats-empleadores"> Cargando...</div>
+                <div class="stat-mapa" id="stats-total"> Cargando...</div>
+            </div>
+        </div>
+
+        <div class="mapa-grid">
+            <div class="filtros-panel">
+                <div class="filtros-titulo"><i class="fa-solid fa-filter"></i> Filtrar búsqueda</div>
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Tipo de usuario</label>
+                    <div class="filtro-botones">
+                        <button class="filtro-btn active" data-tipo="todos"><i class="fa-solid fa-globe"></i>
+                            Todos</button>
+                        <button class="filtro-btn" data-tipo="trabajadores"><i class="fa-solid fa-hard-hat"></i>
+                            Trabajadores</button>
+                        <button class="filtro-btn" data-tipo="empleadores"><i class="fa-solid fa-building"></i>
+                            Empleadores</button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div id="map"></div>
+                <div class="resultados-lista" style="margin-top: 1rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div class="filtros-titulo"
+                            style="margin-top: 0; margin-bottom: 0; border-bottom: none; padding-bottom: 0;">
+                            <i class="fa-solid fa-list"></i> Profesionales
+                        </div>
+                        <span id="resultados-count"
+                            style="background: #E8F0FE; padding: 0.3rem 0.8rem; border-radius: 2rem; font-weight: 600;">(0)</span>
+                    </div>
+                    <div id="lista-resultados">
+                        <div style="text-align: center; padding: 2rem;">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Cargando profesionales...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map, markers = [];
+        let currentTipo = 'todos';
+        let ubicacionesReales = [];
+
+        // Coordenadas por ciudad
+        const coordenadasCiudades = {
+            'la paz': [-16.5000, -68.1500],
+            'sopocachi': [-16.5078, -68.1224],
+            'calacoto': [-16.5287, -68.0763],
+            'obrajes': [-16.5139, -68.1027],
+            'miraflores': [-16.4945, -68.1275],
+            'cochabamba': [-17.3895, -66.1568],
+            'santa cruz': [-17.7836, -63.1821],
+            'el alto': [-16.5100, -68.1700],
+            'sucre': [-19.0333, -65.2627],
+            'potosi': [-19.5836, -65.7531],
+            'tarija': [-21.5355, -64.7295],
+            'oruro': [-17.9667, -67.1167]
+        };
+
+        function obtenerCoordenadas(ubicacion) {
+            if (!ubicacion) return [-16.5000, -68.1500];
+            const ubicacionLower = ubicacion.toLowerCase();
+            for (const [key, coord] of Object.entries(coordenadasCiudades)) {
+                if (ubicacionLower.includes(key)) {
+                    return coord;
+                }
+            }
+            return [-16.5000, -68.1500];
+        }
+
+        function initMap() {
+            map = L.map('map').setView([-16.5000, -68.1500], 7);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+            cargarUbicacionesReales();
+        }
+
+        function cargarUbicacionesReales() {
+            fetch(`/api/ubicaciones/?tipo=${currentTipo}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.ubicaciones && data.ubicaciones.length > 0) {
+                        ubicacionesReales = data.ubicaciones;
+                        // Procesar ubicaciones reales
+                        const ubicacionesProcesadas = ubicacionesReales.map(u => ({
+                            id: u.id,
+                            nombre: u.nombre,
+                            tipo: u.tipo,
+                            oficio: u.oficio,
+                            ubicacion: u.ubicacion,
+                            lat: u.lat || obtenerCoordenadas(u.ubicacion)[0],
+                            lng: u.lng || obtenerCoordenadas(u.ubicacion)[1],
+                            calificacion: u.calificacion,
+                            disponible: u.disponible,
+                            foto: u.foto
+                        }));
+                        actualizarMapa(ubicacionesProcesadas);
+                        actualizarLista(ubicacionesProcesadas);
+                        actualizarStats(ubicacionesProcesadas);
+                    } else {
+                        // Si no hay datos reales, usar datos de prueba
+                        usarDatosPrueba();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    usarDatosPrueba();
+                });
+        }
+
+        function usarDatosPrueba() {
+            const datosPrueba = {
+                trabajadores: [
+                    { id: 1, nombre: "Juan Perez", oficio: "Electricista", lat: -16.5000, lng: -68.1500, calificacion: 4.5, disponible: true, tipo: 'trabajador', ubicacion: "La Paz" },
+                    { id: 2, nombre: "Carlos Lopez", oficio: "Plomero", lat: -16.5100, lng: -68.1400, calificacion: 4.0, disponible: true, tipo: 'trabajador', ubicacion: "La Paz" },
+                    { id: 3, nombre: "Maria Flores", oficio: "Carpintero", lat: -16.4900, lng: -68.1600, calificacion: 5.0, disponible: false, tipo: 'trabajador', ubicacion: "La Paz" },
+                    { id: 4, nombre: "Pedro Mamani", oficio: "Electricista", lat: -16.5200, lng: -68.1300, calificacion: 4.2, disponible: true, tipo: 'trabajador', ubicacion: "El Alto" },
+                    { id: 5, nombre: "Ana Condori", oficio: "Cocinera", lat: -16.4800, lng: -68.1700, calificacion: 4.8, disponible: true, tipo: 'trabajador', ubicacion: "Cochabamba" },
+                    { id: 10, nombre: "Constructora ABC", oficio: "Construcción", lat: -16.5050, lng: -68.1450, calificacion: 4.3, tipo: 'empleador', ubicacion: "Santa Cruz" },
+                    { id: 11, nombre: "Restaurante El Sabor", oficio: "Restaurante", lat: -16.5150, lng: -68.1550, calificacion: 4.6, tipo: 'empleador', ubicacion: "Sucre" },
+                    { id: 12, nombre: "Taller Mecánico", oficio: "Mecánica", lat: -16.4950, lng: -68.1350, calificacion: 4.1, tipo: 'empleador', ubicacion: "Potosi" }
+                ]
+            };
+
+            let ubicaciones = [];
+            if (currentTipo === 'todos' || currentTipo === 'trabajadores') {
+                ubicaciones.push(...datosPrueba.trabajadores.filter(t => t.tipo === 'trabajador'));
+            }
+            if (currentTipo === 'todos' || currentTipo === 'empleadores') {
+                ubicaciones.push(...datosPrueba.trabajadores.filter(t => t.tipo === 'empleador'));
+            }
+
+            actualizarMapa(ubicaciones);
+            actualizarLista(ubicaciones);
+            actualizarStats(ubicaciones);
+        }
+
+        function actualizarMapa(ubicaciones) {
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            if (ubicaciones.length === 0) {
+                document.getElementById('lista-resultados').innerHTML = '<div style="text-align:center;padding:2rem;">No hay profesionales disponibles</div>';
+                return;
+            }
+
+            let bounds = L.latLngBounds();
+
+            ubicaciones.forEach(u => {
+                if (!u.lat || !u.lng) return;
+                bounds.extend([u.lat, u.lng]);
+
+                const color = u.tipo === 'trabajador' ? '#0A66C2' : '#9333EA';
+                const icono = L.divIcon({
+                    html: `<div style="background:${color};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);font-size:18px;">
+                                <i class="fas ${u.tipo === 'trabajador' ? 'fa-hard-hat' : 'fa-building'}"></i>
+                                ${u.disponible ? '<div style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;background:#10B981;border-radius:50%;border:2px solid white;"></div>' : ''}
+                          </div>`,
+                    className: 'custom-div-icon',
+                    iconSize: [40, 40],
+                    popupAnchor: [0, -20]
+                });
+
+                const marker = L.marker([u.lat, u.lng], { icon: icono }).addTo(map);
+                const estrellas = '⭐'.repeat(Math.floor(u.calificacion)) + '☆'.repeat(5 - Math.floor(u.calificacion));
+
+                marker.bindPopup(`
+                    <div style="text-align:center;min-width:220px;padding:0.3rem;">
+                        <div style="font-weight:700;font-size:1.1rem;margin-bottom:0.3rem;">${u.nombre}</div>
+                        <div style="font-size:0.85rem;color:#0A66C2;"><strong>${u.oficio}</strong></div>
+                        <div style="font-size:0.8rem;margin:0.3rem 0;">${estrellas} (${u.calificacion})</div>
+                        <div style="font-size:0.75rem;color:#6B7280;"><i class="fas fa-map-marker-alt"></i> ${u.ubicacion || 'Bolivia'}</div>
+                        ${u.disponible ? '<div style="margin-top:0.3rem;"><span style="background:#10B981;color:white;padding:0.2rem 0.8rem;border-radius:20px;font-size:0.7rem;">Disponible</span></div>' : ''}
+                        <a href="/perfil-trabajador/${u.id}/" style="display:inline-block;margin-top:0.5rem;padding:0.3rem 1rem;background:#0A66C2;color:white;border-radius:20px;text-decoration:none;font-size:0.75rem;">Ver perfil →</a>
+                    </div>
+                `);
+                markers.push(marker);
+            });
+
+            if (markers.length > 0) {
+                map.fitBounds(bounds);
+            }
+        }
+
+        function actualizarLista(ubicaciones) {
+            const container = document.getElementById('lista-resultados');
+            document.getElementById('resultados-count').innerHTML = `(${ubicaciones.length})`;
+
+            if (ubicaciones.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fa-regular fa-face-frown"></i> No hay profesionales</div>';
+                return;
+            }
+
+            let html = '';
+            ubicaciones.forEach(u => {
+                const estrellas = '⭐'.repeat(Math.floor(u.calificacion)) + '☆'.repeat(5 - Math.floor(u.calificacion));
+                html += `
+                    <div class="resultado-item" onclick="window.location.href='/perfil-trabajador/${u.id}/'">
+                        <div class="resultado-info">
+                            <div class="resultado-nombre">${u.nombre} ${u.disponible ? '<span style="background:#10B981;color:white;padding:0.1rem 0.5rem;border-radius:1rem;font-size:0.6rem;margin-left:0.3rem;">Disponible</span>' : ''}</div>
+                            <div class="resultado-oficio"><i class="fas ${u.tipo === 'trabajador' ? 'fa-hard-hat' : 'fa-building'}"></i> ${u.oficio}</div>
+                            <div class="resultado-rating">${estrellas}</div>
+                        </div>
+                        <span class="resultado-badge ${u.tipo === 'trabajador' ? 'badge-trabajador' : 'badge-empleador'}">
+                            ${u.tipo === 'trabajador' ? '👷 Trabajador' : '🏢 Empleador'}
+                        </span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function actualizarStats(ubicaciones) {
+            const trabajadores = ubicaciones.filter(u => u.tipo === 'trabajador').length;
+            const empleadores = ubicaciones.filter(u => u.tipo === 'empleador').length;
+            document.getElementById('stats-trabajadores').innerHTML = ` Trabajadores: ${trabajadores}`;
+            document.getElementById('stats-empleadores').innerHTML = ` Empleadores: ${empleadores}`;
+            document.getElementById('stats-total').innerHTML = ` Total: ${ubicaciones.length}`;
+        }
+
+        document.querySelectorAll('[data-tipo]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('[data-tipo]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTipo = this.dataset.tipo;
+                cargarUbicacionesReales();
+            });
+        });
+
+        initMap();
+    </script>
+</body>
+
+</html>
