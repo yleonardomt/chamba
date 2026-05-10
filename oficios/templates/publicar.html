@@ -15,20 +15,14 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-image: radial-gradient(circle, #d1dae8 1.5px, transparent 1.5px);
-
-            background-size: 24px 24px;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
+        .publicar-container {
+            max-width: 650px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
 
         .publicar-card {
-            max-width: 650px;
             width: 100%;
             background: white;
             border-radius: 2rem;
@@ -94,7 +88,7 @@
 
         .btn-subir-foto {
             width: 100%;
-            background: #F4F4F4;
+            background: #F4F4F6;
             border: 2px dashed #D1D5DB;
             padding: 2rem;
             border-radius: 1rem;
@@ -181,20 +175,6 @@
             box-shadow: 0 8px 20px rgba(10, 102, 194, 0.3);
         }
 
-        .btn-volver {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #0A66C2;
-            text-decoration: none;
-            font-weight: 500;
-            margin-bottom: 1rem;
-        }
-
-        .btn-volver:hover {
-            text-decoration: underline;
-        }
-
         .error-msg {
             background: #FEF2F2;
             color: #DC2626;
@@ -204,61 +184,81 @@
             font-size: 1.3rem;
             display: none;
         }
+
+        @media (max-width: 768px) {
+            .publicar-container {
+                margin: 1rem;
+                padding: 0 1rem;
+            }
+            
+            .publicar-header h3 {
+                font-size: 1.3rem;
+            }
+            
+            .publicar-header img {
+                width: 4rem;
+                height: 4rem;
+            }
+            
+            .publicar-body {
+                padding: 1.5rem;
+            }
+        }
     </style>
 </head>
 
-<body>
+<body class="chamba-dashboard">
 
-    <div class="publicar-card">
-        <div class="publicar-header">
-            {% if user.perfil.foto_perfil %}
-            <img src="{{ user.perfil.foto_perfil.url }}" alt="Foto perfil">
-            {% else %}
-            <img src="https://ui-avatars.com/api/?background=0A66C2&color=fff&name={{ user.first_name|default:user.username }}"
-                alt="Avatar">
-            {% endif %}
-            <div>
-                <h3>{{ user.get_full_name|default:user.username }}</h3>
-                <p><i class="fa-regular fa-circle-dot" style="font-size: 1rem;"></i> Crear publicación</p>
+    {% include 'includes/navbar.html' %}
+
+    <div class="publicar-container">
+        <div class="publicar-card">
+            <div class="publicar-header">
+                {% if user.perfil.foto_perfil %}
+                <img src="{{ user.perfil.foto_perfil.url }}" alt="Foto perfil">
+                {% else %}
+                <img src="https://ui-avatars.com/api/?background=0A66C2&color=fff&name={{ user.first_name|default:user.username }}"
+                    alt="Avatar">
+                {% endif %}
+                <div>
+                    <h3>{{ user.get_full_name|default:user.username }}</h3>
+                    <p><i class="fa-regular fa-circle-dot" style="font-size: 1rem;"></i> Crear publicación</p>
+                </div>
             </div>
-        </div>
 
-        <div class="publicar-body">
-            <a href="{% url 'dashboard' %}" class="btn-volver">
-                <i class="fas fa-arrow-left"></i> Volver al dashboard
-            </a>
+            <div class="publicar-body">
+                <form method="post" enctype="multipart/form-data" id="publicarForm">
+                    {% csrf_token %}
+                    <textarea name="contenido" id="contenido" rows="4"
+                        placeholder="¿Qué estás pensando? Comparte algo con la comunidad..."></textarea>
 
-            <form method="post" enctype="multipart/form-data" id="publicarForm">
-                {% csrf_token %}
-                <textarea name="contenido" id="contenido" rows="4"
-                    placeholder="¿Qué estás pensando? Comparte algo con la comunidad..."></textarea>
+                    <div class="opciones-archivo">
+                        <button type="button" class="btn-subir-foto"
+                            onclick="document.getElementById('imagenInput').click()">
+                            <i class="fa-solid fa-image"></i>
+                            <span>Subir imagen</span>
+                        </button>
+                    </div>
 
-                <div class="opciones-archivo">
-                    <button type="button" class="btn-subir-foto"
-                        onclick="document.getElementById('imagenInput').click()">
-                        <i class="fa-solid fa-image"></i>
-                        <span>Subir imagen</span>
+                    <input type="file" name="imagen" id="imagenInput" accept="image/*" style="display: none;"
+                        onchange="previewImagen(event)">
+
+                    <div id="preview-imagen">
+                        <img id="imagenPreview" src="" alt="Vista previa">
+                        <button type="button" class="btn-eliminar-foto" onclick="eliminarFoto()">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn-publicar">
+                        <i class="fa-regular fa-paper-plane"></i> Publicar
                     </button>
-                </div>
 
-                <input type="file" name="imagen" id="imagenInput" accept="image/*" style="display: none;"
-                    onchange="previewImagen(event)">
-
-                <div id="preview-imagen">
-                    <img id="imagenPreview" src="" alt="Vista previa">
-                    <button type="button" class="btn-eliminar-foto" onclick="eliminarFoto()">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-
-                <button type="submit" class="btn-publicar">
-                    <i class="fa-regular fa-paper-plane"></i> Publicar
-                </button>
-
-                <div id="errorMsg" class="error-msg">
-                    <i class="fa-solid fa-circle-exclamation"></i> Por favor escribe algo antes de publicar
-                </div>
-            </form>
+                    <div id="errorMsg" class="error-msg">
+                        <i class="fa-solid fa-circle-exclamation"></i> Por favor escribe algo antes de publicar
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
