@@ -345,7 +345,26 @@ def publicar_oferta(request):
 
 @login_required
 def empleos(request):
+    from datetime import date
+    hoy = date.today()
     ofertas = Oferta.objects.filter(activa=True).order_by("-fecha_publicacion")
+    
+    # Agregar estado a cada oferta para mostrar en la tarjeta
+    for oferta in ofertas:
+        if oferta.fecha_limite:
+            if oferta.fecha_limite < hoy:
+                oferta.estado = "Caducada"
+                oferta.estado_color = "#EF4444"
+            elif (oferta.fecha_limite - hoy).days <= 3:
+                oferta.estado = "¡Por vencer!"
+                oferta.estado_color = "#F59E0B"
+            else:
+                oferta.estado = "Abierta"
+                oferta.estado_color = "#10B981"
+        else:
+            oferta.estado = "Abierta"
+            oferta.estado_color = "#10B981"
+    
     return render(request, "empleos.html", {"ofertas": ofertas})
 
 
@@ -401,6 +420,24 @@ def trabajadores(request):
 @login_required
 def api_oferta_detalle(request, oferta_id):
     oferta = get_object_or_404(Oferta, id=oferta_id)
+    
+    # Calcular estado de la oferta
+    from datetime import date
+    hoy = date.today()
+    estado = "Abierta"
+    estado_color = "#10B981"  # Verde
+    estado_icono = "fa-check-circle"
+    
+    if oferta.fecha_limite:
+        if oferta.fecha_limite < hoy:
+            estado = "Caducada"
+            estado_color = "#EF4444"  # Rojo
+            estado_icono = "fa-calendar-xmark"
+        elif (oferta.fecha_limite - hoy).days <= 3:
+            estado = "¡Por vencer!"
+            estado_color = "#F59E0B"  # Naranja
+            estado_icono = "fa-clock"
+    
     data = {
         "id": oferta.id,
         "titulo": oferta.titulo,
@@ -412,16 +449,14 @@ def api_oferta_detalle(request, oferta_id):
             oferta.fecha_limite.strftime("%d/%m/%Y") if oferta.fecha_limite else None
         ),
         "fecha": formatear_tiempo(oferta.fecha_publicacion),
-        "empresa": oferta.empleador.perfil.nombre_empresa
-        or oferta.empleador.get_full_name(),
-        "telefono": oferta.empleador.perfil.telefono,  # 👈 AGREGAR ESTA LÍNEA
-        "foto": (
-            oferta.empleador.perfil.foto_perfil.url
-            if oferta.empleador.perfil.foto_perfil
-            else f"https://ui-avatars.com/api/?background=0A66C2&color=fff&name={oferta.empleador.username}"
-        ),
+        "empresa": oferta.empleador.perfil.nombre_empresa or oferta.empleador.get_full_name(),
+        "telefono": oferta.empleador.perfil.telefono,
+        "foto": oferta.empleador.perfil.foto_perfil.url if oferta.empleador.perfil.foto_perfil else f"https://ui-avatars.com/api/?background=0A66C2&color=fff&name={oferta.empleador.username}",
         "tipo": "oferta",
         "es_propia": oferta.empleador == request.user,
+        "estado": estado,
+        "estado_color": estado_color,
+        "estado_icono": estado_icono,
     }
     return JsonResponse(data)
 

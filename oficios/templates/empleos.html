@@ -41,6 +41,15 @@
             background: #10B981;
             color: white;
         }
+        .badge-estado {
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
         .chips-container {
             display: flex;
             flex-wrap: wrap;
@@ -319,7 +328,9 @@
                      data-ubicacion="{{ oferta.ubicacion|lower|escapejs }}"
                      data-descripcion="{{ oferta.descripcion|lower|escapejs }}"
                      data-empresa="{{ oferta.empleador.perfil.nombre_empresa|default:oferta.empleador.get_full_name|escapejs }}"
-                     data-es-propia="{% if oferta.empleador == user %}true{% else %}false{% endif %}">
+                     data-es-propia="{% if oferta.empleador == user %}true{% else %}false{% endif %}"
+                     data-estado="{{ oferta.estado }}"
+                     data-fecha-limite="{{ oferta.fecha_limite|date:'Y-m-d' }}">
                     <div style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem;">
                         {% if oferta.empleador.perfil.foto_perfil %}
                         <img src="{{ oferta.empleador.perfil.foto_perfil.url }}" class="company-avatar">
@@ -338,7 +349,13 @@
                                 <i class="fa-regular fa-clock"></i> Publicado {{ oferta.fecha_publicacion|timesince }} atrás
                             </span>
                         </div>
-                        <span class="badge-oferta"><i class="fa-solid fa-briefcase"></i> Oferta</span>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <span class="badge-oferta"><i class="fa-solid fa-briefcase"></i> Oferta</span>
+                            <span class="badge-estado" style="background: {{ oferta.estado_color }}20; color: {{ oferta.estado_color }};">
+                                <i class="fa-solid {% if oferta.estado == 'Caducada' %}fa-calendar-xmark{% elif oferta.estado == '¡Por vencer!' %}fa-clock{% else %}fa-check-circle{% endif %}"></i>
+                                {{ oferta.estado }}
+                            </span>
+                        </div>
                     </div>
                     <div style="padding: 0 1.2rem 0.8rem;">
                         <h3 style="font-size: 1.4rem; font-weight: 700;" class="oferta-titulo">{{ oferta.titulo }}</h3>
@@ -347,6 +364,11 @@
                             <span class="chip-ubicacion"><i class="fa-solid fa-location-dot"></i> {{ oferta.ubicacion }}</span>
                             {% if oferta.remuneracion %}
                             <span class="chip-remuneracion"><i class="fa-solid fa-money-bill-wave"></i> {{ oferta.remuneracion }} Bs</span>
+                            {% endif %}
+                            {% if oferta.fecha_limite %}
+                            <span class="chip-remuneracion" style="background: #FEF2F2; color: #DC2626;">
+                                <i class="fa-regular fa-calendar"></i> Límite: {{ oferta.fecha_limite|date:"d/m/Y" }}
+                            </span>
                             {% endif %}
                         </div>
                     </div>
@@ -409,6 +431,15 @@
                 <div class="filtro-grupo">
                     <label class="filtro-label"><i class="fa-solid fa-location-dot"></i> Ubicación</label>
                     <input type="text" id="filtro-ubicacion" class="filtro-input" placeholder="Ej: La Paz, Santa Cruz...">
+                </div>
+                <div class="filtro-grupo">
+                    <label class="filtro-label"><i class="fa-solid fa-calendar"></i> Estado</label>
+                    <select id="filtro-estado" class="filtro-select">
+                        <option value="">Todos</option>
+                        <option value="Abierta">✅ Abiertas</option>
+                        <option value="¡Por vencer!">⚠️ Por vencer</option>
+                        <option value="Caducada">❌ Caducadas</option>
+                    </select>
                 </div>
                 <button id="btn-filtrar" class="btn-filtrar">
                     <i class="fa-solid fa-magnifying-glass"></i> Aplicar filtros
@@ -485,6 +516,7 @@
             const buscarTexto = document.getElementById('filtro-buscar').value.toLowerCase().trim();
             const oficioFiltro = document.getElementById('filtro-oficio').value.toLowerCase();
             const ubicacionFiltro = document.getElementById('filtro-ubicacion').value.toLowerCase().trim();
+            const estadoFiltro = document.getElementById('filtro-estado').value;
             let contador = 0;
             
             todasOfertas.forEach(oferta => {
@@ -492,6 +524,7 @@
                 const oficio = oferta.dataset.oficio || '';
                 const ubicacion = oferta.dataset.ubicacion || '';
                 const descripcion = oferta.dataset.descripcion || '';
+                const estado = oferta.dataset.estado || '';
                 let mostrar = true;
                 
                 if (buscarTexto && !titulo.includes(buscarTexto) && !oficio.includes(buscarTexto) && !descripcion.includes(buscarTexto)) {
@@ -501,6 +534,9 @@
                     mostrar = false;
                 }
                 if (ubicacionFiltro && !ubicacion.includes(ubicacionFiltro)) {
+                    mostrar = false;
+                }
+                if (estadoFiltro && estado !== estadoFiltro) {
                     mostrar = false;
                 }
                 
@@ -514,6 +550,7 @@
             document.getElementById('filtro-buscar').value = '';
             document.getElementById('filtro-oficio').value = '';
             document.getElementById('filtro-ubicacion').value = '';
+            document.getElementById('filtro-estado').value = '';
             todasOfertas.forEach(oferta => oferta.style.display = 'block');
             actualizarTotal(todasOfertas.length);
         }
@@ -533,6 +570,9 @@
                     const modalContenido = document.getElementById('modalContenido');
                     const modalBotones = document.getElementById('modalBotones');
                     
+                    const estadoColor = data.estado === 'Caducada' ? '#EF4444' : (data.estado === '¡Por vencer!' ? '#F59E0B' : '#10B981');
+                    const estadoIcono = data.estado === 'Caducada' ? 'fa-calendar-xmark' : (data.estado === '¡Por vencer!' ? 'fa-clock' : 'fa-check-circle');
+                    
                     if (modalContenido) {
                         modalContenido.innerHTML = `
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #E5E7EB;">
@@ -543,7 +583,12 @@
                                     <span style="color: #9CA3AF; font-size: 0.8rem;"><i class="fa-regular fa-calendar"></i> Publicado: ${data.fecha}</span>
                                 </div>
                             </div>
-                            <h4 style="font-size: 1.5rem; font-weight: 700;">${data.titulo}</h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h4 style="font-size: 1.5rem; font-weight: 700;">${data.titulo}</h4>
+                                <span class="badge-estado" style="background: ${estadoColor}20; color: ${estadoColor}; padding: 0.3rem 0.8rem;">
+                                    <i class="fa-solid ${estadoIcono}"></i> ${data.estado || 'Abierta'}
+                                </span>
+                            </div>
                             <div class="chips-container">
                                 <span class="chip-oficio"><i class="fa-solid fa-bolt"></i> ${data.oficio}</span>
                                 <span class="chip-ubicacion"><i class="fa-solid fa-location-dot"></i> ${data.ubicacion}</span>
@@ -553,7 +598,14 @@
                                 <p style="font-weight:600; margin-bottom:0.5rem;"><i class="fa-regular fa-file-lines"></i> DESCRIPCIÓN</p>
                                 <p style="line-height: 1.6;">${data.descripcion}</p>
                             </div>
-                            ${data.fecha_limite ? `<div style="margin-top: 1rem; background: #FEF2F2; padding: 0.8rem; border-radius: 0.8rem;"><p style="color:#DC2626;"><i class="fa-regular fa-calendar-xmark"></i> Fecha límite: ${data.fecha_limite}</p></div>` : ''}
+                            ${data.fecha_limite ? `
+                            <div style="margin-top: 1rem; background: ${estadoColor}20; padding: 0.8rem; border-radius: 0.8rem; border-left: 4px solid ${estadoColor};">
+                                <p style="color: ${estadoColor}; font-weight: 600;">
+                                    <i class="fa-solid ${estadoIcono}"></i> Estado: ${data.estado}
+                                </p>
+                                <p style="margin-top: 0.3rem;"><i class="fa-regular fa-calendar-xmark"></i> Fecha límite: ${data.fecha_limite}</p>
+                            </div>
+                            ` : ''}
                             <div style="margin-top: 1rem; padding: 0.8rem; background: #E8F0FE; border-radius: 0.8rem; color:#0A66C2;">
                                 <i class="fa-brands fa-whatsapp"></i> Contacto WhatsApp: ${data.telefono || 'No disponible'}
                             </div>
@@ -662,7 +714,6 @@
             }
         }
 
-        // Eventos para clics en tarjetas
         document.querySelectorAll('.job-card').forEach(card => {
             card.addEventListener('click', function(e) {
                 if (e.target.closest('.btn-editar-pub') || e.target.closest('.btn-eliminar-pub')) return;
