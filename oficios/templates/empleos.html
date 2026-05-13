@@ -9,32 +9,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/principal.css' %}">
     <style>
-        /* ========== ESTILOS UNIFICADOS AZUL ========== */
-        .job-card,
-        .servicio-card {
+        .job-card {
             transition: all 0.3s ease;
             border-left: 4px solid transparent;
             cursor: pointer;
         }
-
-        .job-card:hover,
-        .servicio-card:hover {
+        .job-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
             border-left-color: #0A66C2;
         }
-
-        .company-avatar,
-        .servicio-avatar {
+        .company-avatar {
             width: 56px;
             height: 56px;
             border-radius: 12px;
             object-fit: cover;
             border: 2px solid #E5E7EB;
         }
-
-        .badge-oferta,
-        .badge-servicio {
+        .badge-oferta {
             background: #E8F0FE;
             color: #0A66C2;
             padding: 0.25rem 0.75rem;
@@ -45,18 +37,17 @@
             align-items: center;
             gap: 0.4rem;
         }
-
+        .badge-mia {
+            background: #10B981;
+            color: white;
+        }
         .chips-container {
             display: flex;
             flex-wrap: wrap;
             gap: 0.8rem;
             margin-bottom: 0.5rem;
         }
-
-        .chip-oficio,
-        .chip-ubicacion,
-        .chip-remuneracion,
-        .chip-precio {
+        .chip-oficio, .chip-ubicacion, .chip-remuneracion {
             background: #F3F4F6;
             padding: 0.2rem 0.8rem;
             border-radius: 2rem;
@@ -65,13 +56,10 @@
             align-items: center;
             gap: 0.4rem;
         }
-
-        .chip-remuneracion,
-        .chip-precio {
+        .chip-remuneracion {
             background: #E8F0FE;
             color: #0A66C2;
         }
-
         .section-header {
             background: #0A66C2;
             color: white;
@@ -81,7 +69,6 @@
             border-radius: 1.2rem;
             margin-bottom: 1rem;
         }
-
         .section-header h2 {
             margin: 0;
             font-size: 1.6rem;
@@ -90,29 +77,18 @@
             justify-content: center;
             gap: 0.5rem;
         }
-
         .section-header p {
             margin-top: 0.3rem;
             font-size: 1rem;
             opacity: 0.9;
         }
-
         .modal-content {
             animation: modalSlide 0.3s ease;
         }
-
         @keyframes modalSlide {
-            from {
-                opacity: 0;
-                transform: scale(0.95) translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
-
         .btn-whatsapp {
             background: #0A66C2;
             color: white;
@@ -127,13 +103,29 @@
             gap: 0.5rem;
             transition: all 0.2s;
         }
-
         .btn-whatsapp:hover {
             background: #004182;
             transform: translateY(-2px);
         }
-
-        /* ========== ESTILOS PARA FILTROS ========== */
+        .btn-editar-oferta {
+            background: #10B981;
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-editar-oferta:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
         .filtros-widget {
             background: white;
             border: 1px solid #E5E7EB;
@@ -141,7 +133,6 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-
         .filtros-titulo {
             font-size: 1.4rem;
             font-weight: 700;
@@ -153,11 +144,9 @@
             border-bottom: 2px solid #E8F0FE;
             padding-bottom: 0.5rem;
         }
-
         .filtro-grupo {
             margin-bottom: 1.2rem;
         }
-
         .filtro-label {
             font-size: 0.85rem;
             font-weight: 600;
@@ -165,9 +154,7 @@
             margin-bottom: 0.5rem;
             display: block;
         }
-
-        .filtro-select,
-        .filtro-input {
+        .filtro-select, .filtro-input {
             width: 100%;
             padding: 0.6rem 0.8rem;
             border: 1px solid #E5E7EB;
@@ -176,14 +163,11 @@
             background: #F9FAFB;
             transition: all 0.2s;
         }
-
-        .filtro-select:focus,
-        .filtro-input:focus {
+        .filtro-select:focus, .filtro-input:focus {
             outline: none;
             border-color: #0A66C2;
             box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.1);
         }
-
         .btn-filtrar {
             width: 100%;
             background: #0A66C2;
@@ -196,12 +180,10 @@
             margin-top: 0.5rem;
             transition: all 0.2s;
         }
-
         .btn-filtrar:hover {
             background: #004182;
             transform: translateY(-2px);
         }
-
         .btn-limpiar {
             width: 100%;
             background: #F3F4F6;
@@ -214,19 +196,68 @@
             margin-top: 0.5rem;
             transition: all 0.2s;
         }
-
         .btn-limpiar:hover {
             background: #E5E7EB;
         }
-
-        .resultado-count {
-            background: #E8F0FE;
-            padding: 0.3rem 0.8rem;
-            border-radius: 2rem;
-            font-size: 0.75rem;
-            font-weight: 600;
+        .modal-edit {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-edit-content {
+            background: white;
+            border-radius: 1.5rem;
+            max-width: 550px;
+            width: 90%;
+            padding: 1.5rem;
+            animation: modalSlide 0.3s ease;
+        }
+        .modal-edit-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
             color: #0A66C2;
-            margin-left: 0.5rem;
+        }
+        .modal-edit-content input,
+        .modal-edit-content textarea,
+        .modal-edit-content select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.8rem;
+            font-size: 1.2rem;
+            font-family: inherit;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+        .modal-buttons button {
+            background: #0A66C2;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+        }
+        .modal-buttons button:first-child {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+        @media (max-width: 768px) {
+            .chamba-layout {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -242,8 +273,7 @@
                 {% if user.perfil.foto_perfil %}
                 <img src="{{ user.perfil.foto_perfil.url }}" class="chamba-profile-pic">
                 {% else %}
-                <img src="https://ui-avatars.com/api/?background=0A66C2&color=fff&name={{ user.first_name|default:user.username }}"
-                    class="chamba-profile-pic">
+                <img src="https://ui-avatars.com/api/?background=0A66C2&color=fff&name={{ user.first_name|default:user.username }}" class="chamba-profile-pic">
                 {% endif %}
                 <div class="chamba-name">{{ user.first_name }} {{ user.last_name }}</div>
                 <div class="chamba-role">
@@ -254,34 +284,21 @@
                     {% endif %}
                 </div>
                 <div class="chamba-stats">
-                    <div>
-                        <div class="chamba-stat-num">{{ user.perfil.total_trabajos|default:"0" }}</div>
-                        <div class="chamba-stat-label">Trabajos</div>
-                    </div>
-                    <div>
-                        <div class="chamba-stat-num">{{ user.perfil.promedio_calificacion|default:"0" }} ★</div>
-                        <div class="chamba-stat-label">Rating</div>
-                    </div>
+                    <div><div class="chamba-stat-num">{{ user.perfil.total_trabajos|default:"0" }}</div><div class="chamba-stat-label">Trabajos</div></div>
+                    <div><div class="chamba-stat-num">{{ user.perfil.promedio_calificacion|default:"0" }} ★</div><div class="chamba-stat-label">Rating</div></div>
                 </div>
                 {% if user.perfil.tipo == 'empleador' %}
-                <a href="{% url 'publicar_oferta' %}" class="chamba-publish"
-                    style="width:100%; margin-top:1rem; text-decoration:none; display:inline-block; text-align:center;"><i
-                        class="fa-solid fa-plus-circle"></i> Publicar oferta</a>
+                <a href="{% url 'publicar_oferta' %}" class="chamba-publish" style="width:100%; margin-top:1rem; text-decoration:none; display:inline-block; text-align:center;"><i class="fa-solid fa-plus-circle"></i> Publicar oferta</a>
                 {% else %}
-                <a href="{% url 'ofrecer_servicio' %}" class="chamba-publish"
-                    style="width:100%; margin-top:1rem; background:#0A66C2; text-decoration:none; display:inline-block; text-align:center;"><i
-                        class="fa-solid fa-plus-circle"></i> Ofrecer servicio</a>
+                <a href="{% url 'ofrecer_servicio' %}" class="chamba-publish" style="width:100%; margin-top:1rem; background:#0A66C2; text-decoration:none; display:inline-block; text-align:center;"><i class="fa-solid fa-plus-circle"></i> Ofrecer servicio</a>
                 {% endif %}
             </div>
             <div class="chamba-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-                    <span style="font-size: 1.1rem; color: #0A66C2;"><i class="fa-regular fa-lightbulb"></i> Frase del
-                        día</span>
-                    <span style="font-size: 1rem; color: #999;"><i class="fa-regular fa-calendar"></i> <span
-                            id="fechaActual"></span></span>
+                    <span style="font-size: 1.1rem; color: #0A66C2;"><i class="fa-regular fa-lightbulb"></i> Frase del día</span>
+                    <span style="font-size: 1rem; color: #999;"><i class="fa-regular fa-calendar"></i> <span id="fechaActual"></span></span>
                 </div>
-                <p style="font-size: 1.3rem; line-height: 1.5; color: #444; margin: 0.5rem 0;"><span
-                        id="fraseMotivacional">Cargando...</span></p>
+                <p style="font-size: 1.3rem; line-height: 1.5; color: #444; margin: 0.5rem 0;"><span id="fraseMotivacional">Cargando...</span></p>
                 <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #aaa;">— CHAMBA —</div>
             </div>
         </aside>
@@ -295,47 +312,46 @@
             <div id="ofertas-container">
                 {% if ofertas %}
                 {% for oferta in ofertas %}
-                <div class="chamba-card job-card" onclick="verDetalle({{ oferta.id }}, 'oferta')"
-                    data-titulo="{{ oferta.titulo|lower }}" data-oficio="{{ oferta.oficio|lower }}"
-                    data-ubicacion="{{ oferta.ubicacion|lower }}" data-descripcion="{{ oferta.descripcion|lower }}">
+                <div class="chamba-card job-card" 
+                     data-id="{{ oferta.id }}"
+                     data-titulo="{{ oferta.titulo|lower|escapejs }}" 
+                     data-oficio="{{ oferta.oficio|lower|escapejs }}" 
+                     data-ubicacion="{{ oferta.ubicacion|lower|escapejs }}"
+                     data-descripcion="{{ oferta.descripcion|lower|escapejs }}"
+                     data-empresa="{{ oferta.empleador.perfil.nombre_empresa|default:oferta.empleador.get_full_name|escapejs }}"
+                     data-es-propia="{% if oferta.empleador == user %}true{% else %}false{% endif %}">
                     <div style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem;">
                         {% if oferta.empleador.perfil.foto_perfil %}
                         <img src="{{ oferta.empleador.perfil.foto_perfil.url }}" class="company-avatar">
                         {% else %}
-                        <img src="https://ui-avatars.com/api/?background=0A66C2&color=fff&name={{ oferta.empleador.username }}"
-                            class="company-avatar">
+                        <img src="https://ui-avatars.com/api/?background=0A66C2&color=fff&name={{ oferta.empleador.username }}" class="company-avatar">
                         {% endif %}
                         <div style="flex: 1;">
                             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                                <strong>
-                                    {{ oferta.empleador.perfil.nombre_empresa|default:oferta.empleador.get_full_name }}
-                                </strong>
+                                <strong>{{ oferta.empleador.perfil.nombre_empresa|default:oferta.empleador.get_full_name }}</strong>
                                 <span class="badge-oferta"><i class="fa-solid fa-check-circle"></i> Verificada</span>
+                                {% if oferta.empleador == user %}
+                                <span class="badge-oferta badge-mia"><i class="fa-solid fa-user"></i> Tu oferta</span>
+                                {% endif %}
                             </div>
                             <span style="color: #9CA3AF; font-size: 0.85rem;">
-                                <i class="fa-regular fa-clock"></i> Publicado {{ oferta.fecha_publicacion|timesince }}
-                                atrás
+                                <i class="fa-regular fa-clock"></i> Publicado {{ oferta.fecha_publicacion|timesince }} atrás
                             </span>
                         </div>
                         <span class="badge-oferta"><i class="fa-solid fa-briefcase"></i> Oferta</span>
                     </div>
                     <div style="padding: 0 1.2rem 0.8rem;">
-                        <h3 style="font-size: 1.4rem; font-weight: 700;">{{ oferta.titulo }}</h3>
+                        <h3 style="font-size: 1.4rem; font-weight: 700;" class="oferta-titulo">{{ oferta.titulo }}</h3>
                         <div class="chips-container">
                             <span class="chip-oficio"><i class="fa-solid fa-bolt"></i> {{ oferta.oficio }}</span>
-                            <span class="chip-ubicacion"><i class="fa-solid fa-location-dot"></i>
-                                {{ oferta.ubicacion}}
-                            </span>
+                            <span class="chip-ubicacion"><i class="fa-solid fa-location-dot"></i> {{ oferta.ubicacion }}</span>
                             {% if oferta.remuneracion %}
-                            <span class="chip-remuneracion"><i class="fa-solid fa-money-bill-wave"></i>
-                                {{oferta.remuneracion }} Bs
-                            </span>
+                            <span class="chip-remuneracion"><i class="fa-solid fa-money-bill-wave"></i> {{ oferta.remuneracion }} Bs</span>
                             {% endif %}
                         </div>
                     </div>
                     <div style="padding: 0.8rem 1.2rem; border-top: 1px solid var(--borde); background: #F9FAFB;">
-                        <span style="color: #0A66C2;"><i class="fa-regular fa-eye"></i> Haz clic para ver detalles <i
-                                class="fa-solid fa-arrow-right"></i></span>
+                        <span style="color: #0A66C2;"><i class="fa-regular fa-eye"></i> Haz clic para ver detalles <i class="fa-solid fa-arrow-right"></i></span>
                     </div>
                 </div>
                 {% endfor %}
@@ -344,53 +360,56 @@
                     <i class="fa-solid fa-briefcase" style="font-size:3rem; margin-bottom:1rem; display:block;"></i>
                     <p>No hay ofertas laborales disponibles aún</p>
                     {% if user.perfil.tipo == 'empleador' %}
-                    <a href="{% url 'publicar_oferta' %}" class="btn-whatsapp"
-                        style="display:inline-block; margin-top:1rem; text-decoration:none;">Publicar mi primera
-                        oferta</a>
+                    <a href="{% url 'publicar_oferta' %}" class="btn-whatsapp" style="display:inline-block; margin-top:1rem; text-decoration:none;">Publicar mi primera oferta</a>
                     {% endif %}
                 </div>
                 {% endif %}
             </div>
 
             <!-- MODAL DETALLES -->
-            <div id="modalDetalle"
-                style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:10000; align-items:center; justify-content:center;">
-                <div class="modal-content"
-                    style="background:white; border-radius:1.5rem; width:95%; max-width:550px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px rgba(0,0,0,0.3);">
-                    <div
-                        style="padding:1rem 1.5rem; border-bottom:1px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
-                        <h3 style="font-size:1.2rem; font-weight:700;"><i class="fa-solid fa-briefcase"
-                                style="color:#0A66C2;"></i> Detalle de la oferta</h3>
-                        <button onclick="cerrarModal()"
-                            style="width:2.5rem; height:2.5rem; border-radius:50%; border:none; background:#E5E7EB; cursor:pointer;">✕</button>
+            <div id="modalDetalle" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:10000; align-items:center; justify-content:center;">
+                <div class="modal-content" style="background:white; border-radius:1.5rem; width:95%; max-width:550px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px rgba(0,0,0,0.3);">
+                    <div style="padding:1rem 1.5rem; border-bottom:1px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
+                        <h3 style="font-size:1.2rem; font-weight:700;"><i class="fa-solid fa-briefcase" style="color:#0A66C2;"></i> Detalle de la oferta</h3>
+                        <button onclick="cerrarModal()" style="width:2.5rem; height:2.5rem; border-radius:50%; border:none; background:#E5E7EB; cursor:pointer;">✕</button>
                     </div>
                     <div id="modalContenido" style="flex:1; overflow-y:auto; padding:1.5rem;"></div>
-                    <div
-                        style="padding:1rem 1.5rem; border-top:1px solid #E5E7EB; display:flex; gap:1rem; background:#F8FAFC;">
-                        <button onclick="cerrarModal()" class="btn-cerrar-modal"
-                            style="flex:1; padding:0.7rem; border:1.5px solid #E5E7EB; background:white; border-radius:2rem; cursor:pointer;">Cerrar</button>
-                        <button class="btn-whatsapp" style="flex:1;" onclick="contactar()"><i
-                                class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</button>
+                    <div id="modalBotones" style="padding:1rem 1.5rem; border-top:1px solid #E5E7EB; display:flex; gap:1rem; background:#F8FAFC;">
+                        <button onclick="cerrarModal()" class="btn-cerrar-modal" style="flex:1; padding:0.7rem; border:1.5px solid #E5E7EB; background:white; border-radius:2rem; cursor:pointer;">Cerrar</button>
+                        <button class="btn-whatsapp" style="flex:1;" onclick="contactar()"><i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</button>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- SIDEBAR DERECHO CON FILTROS -->
         <aside class="chamba-sidebar-right">
             <div class="filtros-widget">
                 <div class="filtros-titulo">
                     <i class="fa-solid fa-filter"></i> Filtrar búsqueda
                 </div>
-
                 <div class="filtro-grupo">
                     <label class="filtro-label"><i class="fa-solid fa-magnifying-glass"></i> Buscar</label>
-                    <input type="text" id="filtro-buscar" class="filtro-input"
-                        placeholder="Ej: electricista, construcción...">
+                    <input type="text" id="filtro-buscar" class="filtro-input" placeholder="Ej: electricista, construcción...">
                 </div>
-
-
-
+                <div class="filtro-grupo">
+                    <label class="filtro-label"><i class="fa-solid fa-bolt"></i> Oficio</label>
+                    <select id="filtro-oficio" class="filtro-select">
+                        <option value="">Todos los oficios</option>
+                        <option value="electricista">⚡ Electricista</option>
+                        <option value="plomero">🔧 Plomero</option>
+                        <option value="carpintero">🪵 Carpintero</option>
+                        <option value="cocinero">🍳 Cocinero</option>
+                        <option value="limpieza">🧹 Limpieza</option>
+                        <option value="construcción">🏗️ Construcción</option>
+                        <option value="pintor">🎨 Pintor</option>
+                        <option value="jardinero">🌿 Jardinero</option>
+                        <option value="mecánico">🔧 Mecánico</option>
+                    </select>
+                </div>
+                <div class="filtro-grupo">
+                    <label class="filtro-label"><i class="fa-solid fa-location-dot"></i> Ubicación</label>
+                    <input type="text" id="filtro-ubicacion" class="filtro-input" placeholder="Ej: La Paz, Santa Cruz...">
+                </div>
                 <button id="btn-filtrar" class="btn-filtrar">
                     <i class="fa-solid fa-magnifying-glass"></i> Aplicar filtros
                 </button>
@@ -398,7 +417,6 @@
                     <i class="fa-solid fa-trash"></i> Limpiar filtros
                 </button>
             </div>
-
             <div class="filtros-widget">
                 <div class="filtros-titulo">
                     <i class="fa-solid fa-chart-simple"></i> Estadísticas
@@ -411,69 +429,84 @@
         </aside>
     </div>
 
+    <!-- MODAL DE EDICIÓN DE OFERTA -->
+    <div id="modalEditarOferta" class="modal-edit">
+        <div class="modal-edit-content">
+            <h3><i class="fas fa-edit"></i> Editar oferta</h3>
+            <form id="formEditarOferta">
+                {% csrf_token %}
+                <input type="hidden" id="editOfertaId">
+                <input type="text" id="editTitulo" placeholder="Título" required>
+                <select id="editOficio" required>
+                    <option value="">Selecciona un oficio</option>
+                    <option value="Electricista">⚡ Electricista</option>
+                    <option value="Plomero">🔧 Plomero</option>
+                    <option value="Carpintero">🪵 Carpintero</option>
+                    <option value="Cocinero">🍳 Cocinero</option>
+                    <option value="Limpieza">🧹 Limpieza</option>
+                    <option value="Construcción">🏗️ Construcción</option>
+                    <option value="Pintor">🎨 Pintor</option>
+                    <option value="Jardinero">🌿 Jardinero</option>
+                    <option value="Mecánico">🔧 Mecánico</option>
+                </select>
+                <textarea id="editDescripcion" rows="5" placeholder="Descripción detallada" required></textarea>
+                <input type="text" id="editUbicacion" placeholder="Ubicación" required>
+                <input type="text" id="editRemuneracion" placeholder="Remuneración (ej: 2000 Bs)">
+                <input type="date" id="editFechaLimite">
+                <div class="modal-buttons">
+                    <button type="button" onclick="cerrarModalEditarOferta()">Cancelar</button>
+                    <button type="button" onclick="guardarEdicionOferta()">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Variables globales
         let currentId = null;
         let todasOfertas = [];
 
-        // Inicializar cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const ofertasItems = document.querySelectorAll('#ofertas-container .job-card');
-            ofertasItems.forEach(item => {
-                todasOfertas.push(item);
-                // Guardar datos en dataset
-                item.dataset.titulo = (item.querySelector('h3')?.innerText || '').toLowerCase();
-                const chips = item.querySelectorAll('.chip-oficio, .chip-ubicacion');
-                chips.forEach(chip => {
-                    const text = chip.innerText.toLowerCase();
-                    if (text.includes('electricidad') || text.includes('plomería') || text.includes('carpintería')) {
-                        item.dataset.oficio = text;
-                    }
-                    if (text.includes('la paz') || text.includes('santa cruz') || text.includes('cochabamba')) {
-                        item.dataset.ubicacion = text;
-                    }
-                });
-            });
-
+            todasOfertas = Array.from(ofertasItems);
             actualizarTotal();
 
             document.getElementById('btn-filtrar').addEventListener('click', aplicarFiltros);
             document.getElementById('btn-limpiar').addEventListener('click', limpiarFiltros);
+            
+            document.getElementById('filtro-buscar').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') aplicarFiltros();
+            });
+            document.getElementById('filtro-ubicacion').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') aplicarFiltros();
+            });
         });
 
         function aplicarFiltros() {
             const buscarTexto = document.getElementById('filtro-buscar').value.toLowerCase().trim();
             const oficioFiltro = document.getElementById('filtro-oficio').value.toLowerCase();
             const ubicacionFiltro = document.getElementById('filtro-ubicacion').value.toLowerCase().trim();
-
             let contador = 0;
-
+            
             todasOfertas.forEach(oferta => {
-                const titulo = oferta.dataset.titulo || oferta.querySelector('h3')?.innerText.toLowerCase() || '';
+                const titulo = oferta.dataset.titulo || '';
                 const oficio = oferta.dataset.oficio || '';
                 const ubicacion = oferta.dataset.ubicacion || '';
-                let descripcion = '';
-                const descElem = oferta.querySelector('.job-card div:last-child p');
-                if (descElem) descripcion = descElem.innerText.toLowerCase();
-
+                const descripcion = oferta.dataset.descripcion || '';
                 let mostrar = true;
-
+                
                 if (buscarTexto && !titulo.includes(buscarTexto) && !oficio.includes(buscarTexto) && !descripcion.includes(buscarTexto)) {
                     mostrar = false;
                 }
-
                 if (oficioFiltro && !oficio.includes(oficioFiltro)) {
                     mostrar = false;
                 }
-
                 if (ubicacionFiltro && !ubicacion.includes(ubicacionFiltro)) {
                     mostrar = false;
                 }
-
+                
                 oferta.style.display = mostrar ? 'block' : 'none';
                 if (mostrar) contador++;
             });
-
             actualizarTotal(contador);
         }
 
@@ -481,11 +514,7 @@
             document.getElementById('filtro-buscar').value = '';
             document.getElementById('filtro-oficio').value = '';
             document.getElementById('filtro-ubicacion').value = '';
-
-            todasOfertas.forEach(oferta => {
-                oferta.style.display = 'block';
-            });
-
+            todasOfertas.forEach(oferta => oferta.style.display = 'block');
             actualizarTotal(todasOfertas.length);
         }
 
@@ -495,19 +524,21 @@
             if (totalElement) totalElement.innerText = contador;
         }
 
-        // Modal functions
         function verDetalle(id, tipo) {
             currentId = id;
             fetch(`/api/${tipo}/${id}/`)
                 .then(r => r.json())
                 .then(data => {
-                    const modalContent = document.getElementById('modalContenido');
-                    if (modalContent) {
-                        modalContent.innerHTML = `
+                    const esPropia = data.es_propia || false;
+                    const modalContenido = document.getElementById('modalContenido');
+                    const modalBotones = document.getElementById('modalBotones');
+                    
+                    if (modalContenido) {
+                        modalContenido.innerHTML = `
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #E5E7EB;">
                                 <img src="${data.foto}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
                                 <div>
-                                    <strong style="font-size: 1.3rem;">${data.empresa}</strong>
+                                    <strong style="font-size: 1.3rem;">${data.empresa || data.trabajador}</strong>
                                     <span style="background: #E8F0FE; color: #0A66C2; padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.7rem; font-weight: 600;"><i class="fa-solid fa-check-circle"></i> Verificada</span>
                                     <span style="color: #9CA3AF; font-size: 0.8rem;"><i class="fa-regular fa-calendar"></i> Publicado: ${data.fecha}</span>
                                 </div>
@@ -528,15 +559,27 @@
                             </div>
                         `;
                     }
-                    const modal = document.getElementById('modalDetalle');
-                    if (modal) modal.style.display = 'flex';
+                    
+                    if (modalBotones && esPropia) {
+                        modalBotones.innerHTML = `
+                            <button onclick="cerrarModal()" style="flex:1; padding:0.7rem; border:1.5px solid #E5E7EB; background:white; border-radius:2rem; cursor:pointer;">Cerrar</button>
+                            <button onclick="abrirModalEditarOferta(${id})" class="btn-editar-oferta" style="flex:1;"><i class="fas fa-edit"></i> Editar oferta</button>
+                            <button onclick="eliminarOferta(${id})" style="flex:1; background:#EF4444; color:white; border:none; border-radius:2rem; cursor:pointer;"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                        `;
+                    } else if (modalBotones) {
+                        modalBotones.innerHTML = `
+                            <button onclick="cerrarModal()" style="flex:1; padding:0.7rem; border:1.5px solid #E5E7EB; background:white; border-radius:2rem; cursor:pointer;">Cerrar</button>
+                            <button class="btn-whatsapp" style="flex:1;" onclick="contactar()"><i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</button>
+                        `;
+                    }
+                    
+                    document.getElementById('modalDetalle').style.display = 'flex';
                 })
                 .catch(error => console.error('Error:', error));
         }
 
         function cerrarModal() {
-            const modal = document.getElementById('modalDetalle');
-            if (modal) modal.style.display = 'none';
+            document.getElementById('modalDetalle').style.display = 'none';
             currentId = null;
         }
 
@@ -557,20 +600,85 @@
             }
         }
 
-        // Cerrar modal al hacer clic fuera
-        const modalDetalle = document.getElementById('modalDetalle');
-        if (modalDetalle) {
-            modalDetalle.addEventListener('click', function (e) {
-                if (e.target === this) cerrarModal();
+        function abrirModalEditarOferta(id) {
+            fetch(`/api/oferta/${id}/`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('editOfertaId').value = id;
+                    document.getElementById('editTitulo').value = data.titulo;
+                    document.getElementById('editOficio').value = data.oficio;
+                    document.getElementById('editDescripcion').value = data.descripcion;
+                    document.getElementById('editUbicacion').value = data.ubicacion;
+                    document.getElementById('editRemuneracion').value = data.remuneracion || '';
+                    document.getElementById('editFechaLimite').value = data.fecha_limite || '';
+                    document.getElementById('modalEditarOferta').style.display = 'flex';
+                });
+        }
+
+        function cerrarModalEditarOferta() {
+            document.getElementById('modalEditarOferta').style.display = 'none';
+        }
+
+        function guardarEdicionOferta() {
+            const id = document.getElementById('editOfertaId').value;
+            const formData = new FormData();
+            formData.append('titulo', document.getElementById('editTitulo').value);
+            formData.append('oficio', document.getElementById('editOficio').value);
+            formData.append('descripcion', document.getElementById('editDescripcion').value);
+            formData.append('ubicacion', document.getElementById('editUbicacion').value);
+            formData.append('remuneracion', document.getElementById('editRemuneracion').value);
+            formData.append('fecha_limite', document.getElementById('editFechaLimite').value);
+
+            fetch(`/api/oferta/editar/${id}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    cerrarModalEditarOferta();
+                    cerrarModal();
+                    location.reload();
+                } else {
+                    alert('Error al guardar cambios');
+                }
             });
         }
 
-        // Frase del día
-        const frases = [
-            "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
-            "No busques el éxito, busca hacer un trabajo que te apasione.",
-            "El trabajo duro siempre vence al talento cuando el talento no trabaja duro."
-        ];
+        function eliminarOferta(id) {
+            if (confirm('¿Estás seguro de eliminar esta oferta?')) {
+                fetch(`/api/oferta/eliminar/${id}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        cerrarModal();
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        // Eventos para clics en tarjetas
+        document.querySelectorAll('.job-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-editar-pub') || e.target.closest('.btn-eliminar-pub')) return;
+                const id = this.dataset.id;
+                if (id) verDetalle(id, 'oferta');
+            });
+        });
+
+        document.getElementById('modalDetalle')?.addEventListener('click', function(e) {
+            if (e.target === this) cerrarModal();
+        });
+        document.getElementById('modalEditarOferta')?.addEventListener('click', function(e) {
+            if (e.target === this) cerrarModalEditarOferta();
+        });
+
+        const frases = ["El éxito es la suma de pequeños esfuerzos repetidos día tras día.", "No busques el éxito, busca hacer un trabajo que te apasione.", "El trabajo duro siempre vence al talento cuando el talento no trabaja duro."];
         const hoy = new Date();
         const fechaSpan = document.getElementById('fechaActual');
         const fraseSpan = document.getElementById('fraseMotivacional');

@@ -65,5 +65,50 @@ urlpatterns = [
     ),
     path("mapa/", views.mapa, name="mapa"),
     path("api/ubicaciones/", views.api_ubicaciones, name="api_ubicaciones"),
-    path("api/todos-trabajadores/", views.api_todos_trabajadores, name="api_todos_trabajadores"),
+    path(
+        "api/todos-trabajadores/",
+        views.api_todos_trabajadores,
+        name="api_todos_trabajadores",
+    ),
+    path(
+        "publicacion/editar/<int:pk>/",
+        views.editar_publicacion,
+        name="editar_publicacion",
+    ),
+    path(
+        "publicacion/eliminar/<int:pk>/",
+        views.eliminar_publicacion,
+        name="eliminar_publicacion",
+    ),
+    path(
+        "comentario/editar/<int:pk>/", views.editar_comentario, name="editar_comentario"
+    ),
+    path(
+        "comentario/eliminar/<int:pk>/",
+        views.eliminar_comentario,
+        name="eliminar_comentario",
+    ),
+    path(
+        "perfil/editar-portafolio/<int:foto_id>/",
+        views.editar_portafolio,
+        name="editar_portafolio",
+    ),
+    path(
+        "api/oferta/editar/<int:oferta_id>/",
+        views.editar_oferta_api,
+        name="editar_oferta_api",
+    ),
+    path(
+        "api/oferta/eliminar/<int:oferta_id>/",
+        views.eliminar_oferta_api,
+        name="eliminar_oferta_api",
+    ),
+    # yugar aqui eres
+    path("dashboard-admin/", views.dashboard_admin, name="dashboard_admin"),
+    path("api/usuarios/", views.api_usuarios, name="api_usuarios"),
+    path(
+        "api/usuario/cambiar-estado/<int:user_id>/",
+        views.cambiar_estado_usuario,
+        name="cambiar_estado_usuario",
+    ),
 ]

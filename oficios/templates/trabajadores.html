@@ -9,24 +9,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/principal.css' %}">
     <style>
-        .job-card, .servicio-card {
+        .servicio-card {
             transition: all 0.3s ease;
             border-left: 4px solid transparent;
             cursor: pointer;
         }
-        .job-card:hover, .servicio-card:hover {
+        .servicio-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
             border-left-color: #0A66C2;
         }
-        .company-avatar, .servicio-avatar {
+        .servicio-avatar {
             width: 56px;
             height: 56px;
             border-radius: 12px;
             object-fit: cover;
             border: 2px solid #E5E7EB;
         }
-        .badge-oferta, .badge-servicio {
+        .badge-servicio {
             background: #E8F0FE;
             color: #0A66C2;
             padding: 0.25rem 0.75rem;
@@ -43,7 +43,7 @@
             gap: 0.8rem;
             margin-bottom: 0.5rem;
         }
-        .chip-oficio, .chip-ubicacion, .chip-remuneracion, .chip-precio {
+        .chip-oficio, .chip-ubicacion, .chip-precio {
             background: #F3F4F6;
             padding: 0.2rem 0.8rem;
             border-radius: 2rem;
@@ -73,11 +73,6 @@
             justify-content: center;
             gap: 0.5rem;
         }
-        .section-header p {
-            margin-top: 0.3rem;
-            font-size: 1rem;
-            opacity: 0.9;
-        }
         .modal-content {
             animation: modalSlide 0.3s ease;
         }
@@ -103,16 +98,6 @@
             background: #004182;
             transform: translateY(-2px);
         }
-        .btn-cerrar-modal {
-            flex: 1;
-            padding: 0.7rem;
-            border: 1.5px solid #E5E7EB;
-            background: white;
-            border-radius: 2rem;
-            cursor: pointer;
-        }
-        
-        /* ========== FILTROS ========== */
         .filtros-widget {
             background: white;
             border: 1px solid #E5E7EB;
@@ -186,8 +171,6 @@
         .btn-limpiar:hover {
             background: #E5E7EB;
         }
-
-        /* ========== CARRUSEL PORTAFOLIO ========== */
         .portafolio-carrusel {
             margin: 1rem 0;
             position: relative;
@@ -248,15 +231,9 @@
             justify-content: center;
             z-index: 10;
         }
-        .carrusel-btn-left {
-            left: -10px;
-        }
-        .carrusel-btn-right {
-            right: -10px;
-        }
-        .carrusel-btn:hover {
-            background: #0A66C2;
-        }
+        .carrusel-btn-left { left: -10px; }
+        .carrusel-btn-right { right: -10px; }
+        .carrusel-btn:hover { background: #0A66C2; }
         .modal-foto-grande {
             position: fixed;
             top: 0;
@@ -274,6 +251,9 @@
             max-width: 90%;
             max-height: 90%;
             border-radius: 10px;
+        }
+        @media (max-width: 768px) {
+            .chamba-layout { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -328,12 +308,13 @@
             <div id="servicios-container">
                 {% if servicios %}
                 {% for servicio in servicios %}
-                <div class="chamba-card servicio-card servicio-item" 
-                     data-titulo="{{ servicio.titulo|lower }}" 
-                     data-oficio="{{ servicio.oficio|lower }}" 
-                     data-ubicacion="{{ servicio.ubicacion|lower }}"
-                     data-descripcion="{{ servicio.descripcion|lower }}"
-                     onclick="verDetalle({{ servicio.id }}, 'servicio')">
+                <div class="chamba-card servicio-card" 
+                     data-id="{{ servicio.id }}"
+                     data-titulo="{{ servicio.titulo|lower|escapejs }}" 
+                     data-oficio="{{ servicio.oficio|lower|escapejs }}" 
+                     data-ubicacion="{{ servicio.ubicacion|lower|escapejs }}"
+                     data-descripcion="{{ servicio.descripcion|lower|escapejs }}"
+                     data-trabajador="{{ servicio.trabajador.get_full_name|default:servicio.trabajador.username|escapejs }}">
                     <div style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem;">
                         {% if servicio.trabajador.perfil.foto_perfil %}
                         <img src="{{ servicio.trabajador.perfil.foto_perfil.url }}" class="servicio-avatar">
@@ -377,30 +358,26 @@
                 {% endif %}
             </div>
 
-            <!-- MODAL DETALLES CON CARRUSEL DE PORTAFOLIO -->
+            <!-- MODAL DETALLES -->
             <div id="modalDetalle" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:10000; align-items:center; justify-content:center;">
                 <div class="modal-content" style="background:white; border-radius:1.5rem; width:95%; max-width:600px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px rgba(0,0,0,0.3);">
                     <div style="padding:1rem 1.5rem; border-bottom:1px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
                         <h3 style="font-size:1.2rem; font-weight:700;"><i class="fa-solid fa-tools" style="color:#0A66C2;"></i> Detalle del servicio</h3>
                         <button onclick="cerrarModal()" style="width:2.5rem; height:2.5rem; border-radius:50%; border:none; background:#E5E7EB; cursor:pointer;">✕</button>
                     </div>
-                    <div id="modalContenido" style="flex:1; overflow-y:auto; padding:1.5rem;">
-                        <!-- Contenido dinámico -->
-                    </div>
+                    <div id="modalContenido" style="flex:1; overflow-y:auto; padding:1.5rem;"></div>
                     <div style="padding:1rem 1.5rem; border-top:1px solid #E5E7EB; display:flex; gap:1rem; background:#F8FAFC;">
-                        <button onclick="cerrarModal()" class="btn-cerrar-modal" style="flex:1;">Cerrar</button>
+                        <button onclick="cerrarModal()" class="btn-cerrar-modal" style="flex:1; padding:0.7rem; border:1.5px solid #E5E7EB; background:white; border-radius:2rem; cursor:pointer;">Cerrar</button>
                         <button class="btn-whatsapp" style="flex:1;" onclick="contactar()"><i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</button>
                     </div>
                 </div>
             </div>
 
-            <!-- MODAL PARA VER FOTO GRANDE -->
             <div id="modalFotoGrande" class="modal-foto-grande" onclick="cerrarFotoGrande()">
-                <img id="fotoGrandeImg" src="" alt="Foto ampliada">
+                <img id="fotoGrandeImg" src="">
             </div>
         </main>
 
-        <!-- SIDEBAR DERECHO CON FILTROS -->
         <aside class="chamba-sidebar-right">
             <div class="filtros-widget">
                 <div class="filtros-titulo">
@@ -408,7 +385,7 @@
                 </div>
                 <div class="filtro-grupo">
                     <label class="filtro-label"><i class="fa-solid fa-magnifying-glass"></i> Buscar</label>
-                    <input type="text" id="filtro-buscar" class="filtro-input" placeholder="Ej: electricista, plomería, construcción...">
+                    <input type="text" id="filtro-buscar" class="filtro-input" placeholder="Ej: electricista, plomería...">
                 </div>
                 <button id="btn-filtrar" class="btn-filtrar">
                     <i class="fa-solid fa-magnifying-glass"></i> Aplicar filtros
@@ -430,35 +407,17 @@
     </div>
 
     <script>
-        // Variables globales
         let currentId = null;
         let todosServicios = [];
         let portafolioFotos = [];
 
-        // Inicializar cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', function() {
-            const serviciosItems = document.querySelectorAll('#servicios-container .servicio-item');
-            serviciosItems.forEach(item => {
-                todosServicios.push(item);
-                // Guardar datos en dataset
-                item.dataset.titulo = (item.querySelector('h3')?.innerText || '').toLowerCase();
-                const chips = item.querySelectorAll('.chip-oficio, .chip-ubicacion');
-                chips.forEach(chip => {
-                    const text = chip.innerText.toLowerCase();
-                    if (text.includes('electricidad') || text.includes('plomería') || text.includes('carpintería')) {
-                        item.dataset.oficio = text;
-                    }
-                    if (text.includes('la paz') || text.includes('santa cruz') || text.includes('cochabamba')) {
-                        item.dataset.ubicacion = text;
-                    }
-                });
-            });
+            const serviciosItems = document.querySelectorAll('#servicios-container .servicio-card');
+            todosServicios = Array.from(serviciosItems);
             actualizarTotal();
-            
+
             document.getElementById('btn-filtrar').addEventListener('click', aplicarFiltros);
             document.getElementById('btn-limpiar').addEventListener('click', limpiarFiltros);
-            
-            // Filtrar al presionar Enter
             document.getElementById('filtro-buscar').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') aplicarFiltros();
             });
@@ -472,11 +431,9 @@
                 const titulo = servicio.dataset.titulo || '';
                 const oficio = servicio.dataset.oficio || '';
                 const ubicacion = servicio.dataset.ubicacion || '';
-                let descripcion = '';
-                const descElem = servicio.querySelector('.servicio-card div:last-child p');
-                if (descElem) descripcion = descElem.innerText.toLowerCase();
-                
+                const descripcion = servicio.dataset.descripcion || '';
                 let mostrar = true;
+                
                 if (buscarTexto && !titulo.includes(buscarTexto) && !oficio.includes(buscarTexto) && !descripcion.includes(buscarTexto)) {
                     mostrar = false;
                 }
@@ -484,15 +441,12 @@
                 servicio.style.display = mostrar ? 'block' : 'none';
                 if (mostrar) contador++;
             });
-            
             actualizarTotal(contador);
         }
 
         function limpiarFiltros() {
             document.getElementById('filtro-buscar').value = '';
-            todosServicios.forEach(servicio => {
-                servicio.style.display = 'block';
-            });
+            todosServicios.forEach(servicio => servicio.style.display = 'block');
             actualizarTotal(todosServicios.length);
         }
 
@@ -502,14 +456,12 @@
             if (totalElement) totalElement.innerText = contador;
         }
 
-        // Modal functions
         function verDetalle(id, tipo) {
             currentId = id;
             fetch(`/api/${tipo}/${id}/`)
                 .then(r => r.json())
                 .then(data => {
                     portafolioFotos = data.portafolio_fotos || [];
-                    
                     let portafolioHTML = '';
                     if (portafolioFotos.length > 0) {
                         portafolioHTML = `
@@ -520,7 +472,7 @@
                                     <div class="carrusel-container" id="carruselContainer">
                                         ${portafolioFotos.map(foto => `
                                             <div class="carrusel-item" onclick="event.stopPropagation(); verFotoGrande('${foto.url}')">
-                                                <img src="${foto.url}" alt="${foto.titulo || 'Foto de portafolio'}">
+                                                <img src="${foto.url}" alt="${foto.titulo || 'Foto'}">
                                                 ${foto.titulo ? `<p>${foto.titulo}</p>` : ''}
                                             </div>
                                         `).join('')}
@@ -530,9 +482,7 @@
                             </div>
                         `;
                     } else {
-                        portafolioHTML = `<div style="margin-top:1rem; padding:0.8rem; background:#F9FAFB; border-radius:0.8rem; text-align:center; color:#999;">
-                            <i class="fa-regular fa-images"></i> Este profesional aún no tiene fotos en su portafolio
-                        </div>`;
+                        portafolioHTML = `<div style="margin-top:1rem; padding:0.8rem; background:#F9FAFB; border-radius:0.8rem; text-align:center; color:#999;"><i class="fa-regular fa-images"></i> Sin fotos en portafolio</div>`;
                     }
                     
                     document.getElementById('modalContenido').innerHTML = `
@@ -540,49 +490,42 @@
                             <img src="${data.foto}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
                             <div>
                                 <strong style="font-size: 1.3rem;">${data.trabajador}</strong>
-                                <span style="background: #E8F0FE; color: #0A66C2; padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem;"><i class="fa-solid fa-check-circle"></i> Verificado</span>
-                                <div style="color: #9CA3AF; font-size: 0.8rem; margin-top: 0.2rem;"><i class="fa-regular fa-calendar"></i> Publicado: ${data.fecha}</div>
+                                <span style="background: #E8F0FE; color: #0A66C2; padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.7rem;"><i class="fa-solid fa-check-circle"></i> Verificado</span>
+                                <div style="color: #9CA3AF; font-size: 0.8rem; margin-top: 0.2rem;"><i class="fa-regular fa-calendar"></i> ${data.fecha}</div>
                             </div>
                         </div>
                         <h4 style="font-size: 1.5rem; font-weight: 700;">${data.titulo}</h4>
                         <div class="chips-container">
                             <span class="chip-oficio"><i class="fa-solid fa-bolt"></i> ${data.oficio}</span>
                             <span class="chip-ubicacion"><i class="fa-solid fa-location-dot"></i> ${data.ubicacion}</span>
-                            ${data.precio ? `<span class="chip-precio"><i class="fa-solid fa-tag"></i> Desde ${data.precio} Bs</span>` : ''}
+                            ${data.precio ? `<span class="chip-precio"><i class="fa-solid fa-tag"></i> ${data.precio} Bs</span>` : ''}
                         </div>
                         <div style="background: #F9FAFB; padding: 1rem; border-radius: 1rem; margin-top: 0.5rem;">
-                            <p style="font-weight:600; margin-bottom:0.5rem;"><i class="fa-regular fa-file-lines"></i> DESCRIPCIÓN</p>
+                            <p style="font-weight:600;"><i class="fa-regular fa-file-lines"></i> DESCRIPCIÓN</p>
                             <p style="line-height: 1.6;">${data.descripcion}</p>
                         </div>
                         ${portafolioHTML}
-                        <div style="margin-top: 1rem; padding: 0.8rem; background: #E8F0FE; border-radius: 0.8rem; color:#0A66C2;">
-                            <i class="fa-brands fa-whatsapp"></i> Contacto WhatsApp: ${data.telefono || 'No disponible'}
+                        <div style="margin-top: 1rem; padding: 0.8rem; background: #E8F0FE; border-radius: 0.8rem;">
+                            <i class="fa-brands fa-whatsapp"></i> WhatsApp: ${data.telefono || 'No disponible'}
                         </div>
                     `;
-                    const modal = document.getElementById('modalDetalle');
-                    if (modal) modal.style.display = 'flex';
-                    
+                    document.getElementById('modalDetalle').style.display = 'flex';
                     setTimeout(() => {
                         const container = document.getElementById('carruselContainer');
                         if (container) container.scrollLeft = 0;
                     }, 100);
-                })
-                .catch(error => console.error('Error:', error));
+                });
         }
 
         function desplazarCarrusel(direccion) {
             const container = document.getElementById('carruselContainer');
-            if (container) {
-                const scrollAmount = 200;
-                container.scrollLeft += direccion * scrollAmount;
-            }
+            if (container) container.scrollLeft += direccion * 200;
         }
 
         function verFotoGrande(url) {
-            const modalFoto = document.getElementById('modalFotoGrande');
-            const img = document.getElementById('fotoGrandeImg');
-            img.src = url;
-            modalFoto.style.display = 'flex';
+            const modal = document.getElementById('modalFotoGrande');
+            document.getElementById('fotoGrandeImg').src = url;
+            modal.style.display = 'flex';
         }
 
         function cerrarFotoGrande() {
@@ -590,41 +533,39 @@
         }
 
         function cerrarModal() {
-            const modal = document.getElementById('modalDetalle');
-            if (modal) modal.style.display = 'none';
+            document.getElementById('modalDetalle').style.display = 'none';
             currentId = null;
         }
 
         function contactar() {
             if (currentId) {
                 fetch(`/api/servicio/${currentId}/`)
-                    .then(r = r.json())
+                    .then(r => r.json())
                     .then(data => {
                         const telefono = data.telefono;
                         if (telefono) {
                             let numeroLimpio = telefono.toString().replace(/\D/g, '');
                             if (numeroLimpio.length === 8) numeroLimpio = '591' + numeroLimpio;
-                            window.open(`https://wa.me/${numeroLimpio}?text=Hola%2C%20vi%20tu%20servicio%20"${encodeURIComponent(data.titulo)}"%20en%20CHAMBA%20y%20estoy%20interesado.`, '_blank');
+                            window.open(`https://wa.me/${numeroLimpio}?text=Hola%2C%20vi%20tu%20servicio%20"${encodeURIComponent(data.titulo)}"%20en%20CHAMBA`, '_blank');
                         } else {
-                            alert('El trabajador no ha registrado un número de teléfono');
+                            alert('No hay número de teléfono registrado');
                         }
                     });
             }
         }
 
-        const modalDetalle = document.getElementById('modalDetalle');
-        if (modalDetalle) {
-            modalDetalle.addEventListener('click', function(e) {
-                if (e.target === this) cerrarModal();
+        document.querySelectorAll('.servicio-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const id = this.dataset.id;
+                if (id) verDetalle(id, 'servicio');
             });
-        }
+        });
 
-        const frases = [
-            "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
-            "La calidad nunca es un accidente; es resultado del esfuerzo inteligente.",
-            "Pequeños progresos cada día llevan a grandes resultados.",
-            "Cree en ti mismo y todo será posible."
-        ];
+        document.getElementById('modalDetalle')?.addEventListener('click', function(e) {
+            if (e.target === this) cerrarModal();
+        });
+
+        const frases = ["El éxito es la suma de pequeños esfuerzos.", "La calidad es resultado del esfuerzo.", "Cree en ti mismo."];
         const hoy = new Date();
         const fechaSpan = document.getElementById('fechaActual');
         const fraseSpan = document.getElementById('fraseMotivacional');

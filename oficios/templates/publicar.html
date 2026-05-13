@@ -151,8 +151,14 @@
             transform: scale(1.1);
         }
 
+        .botones-accion {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
         .btn-publicar {
-            width: 100%;
+            flex: 2;
             background: #0A66C2;
             color: white;
             border: none;
@@ -166,13 +172,36 @@
             align-items: center;
             justify-content: center;
             gap: 0.8rem;
-            margin-top: 1rem;
         }
 
         .btn-publicar:hover {
             background: #004182;
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(10, 102, 194, 0.3);
+        }
+
+        .btn-cancelar {
+            flex: 1;
+            background: #F3F4F6;
+            color: #6B7280;
+            border: 1.5px solid #E5E7EB;
+            padding: 1.2rem;
+            border-radius: 3rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            text-decoration: none;
+        }
+
+        .btn-cancelar:hover {
+            background: #E5E7EB;
+            color: #374151;
+            transform: translateY(-2px);
         }
 
         .error-msg {
@@ -202,6 +231,15 @@
             
             .publicar-body {
                 padding: 1.5rem;
+            }
+
+            .botones-accion {
+                flex-direction: column;
+            }
+
+            .btn-publicar, .btn-cancelar {
+                padding: 1rem;
+                font-size: 1.3rem;
             }
         }
     </style>
@@ -250,9 +288,14 @@
                         </button>
                     </div>
 
-                    <button type="submit" class="btn-publicar">
-                        <i class="fa-regular fa-paper-plane"></i> Publicar
-                    </button>
+                    <div class="botones-accion">
+                        <button type="submit" class="btn-publicar">
+                            <i class="fa-regular fa-paper-plane"></i> Publicar
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn-cancelar">
+                            <i class="fa-solid fa-xmark"></i> Cancelar
+                        </a>
+                    </div>
 
                     <div id="errorMsg" class="error-msg">
                         <i class="fa-solid fa-circle-exclamation"></i> Por favor escribe algo antes de publicar

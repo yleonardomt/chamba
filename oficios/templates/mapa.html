@@ -8,6 +8,7 @@
     <title>Mapa de profesionales - CHAMBA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <link rel="stylesheet" href="{% static 'css/principal.css' %}">
     <style>
         * {
@@ -16,7 +17,6 @@
             box-sizing: border-box;
         }
 
-        /* Quitar bordes feos de Leaflet */
         .leaflet-div-icon {
             background: transparent !important;
             border: none !important;
@@ -56,7 +56,7 @@
 
         .mapa-grid {
             display: grid;
-            grid-template-columns: 340px 1fr;
+            grid-template-columns: 360px 1fr;
             gap: 2rem;
         }
 
@@ -68,6 +68,8 @@
             position: sticky;
             top: 8rem;
             height: fit-content;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .filtros-titulo {
@@ -81,45 +83,97 @@
 
         .filtro-grupo {
             margin-bottom: 1.5rem;
+            border-bottom: 1px solid #F3F4F6;
+            padding-bottom: 1rem;
         }
 
         .filtro-label {
             font-weight: 700;
             font-size: 1rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
             display: block;
+            color: #374151;
+        }
+
+        .filtro-label i {
+            color: #0A66C2;
+            margin-right: 0.5rem;
         }
 
         .filtro-botones {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             gap: 0.6rem;
         }
 
         .filtro-btn {
-            padding: 0.7rem 1rem;
-            border-radius: 0.8rem;
+            padding: 0.6rem 1rem;
+            border-radius: 2rem;
             border: 1px solid #E5E7EB;
             background: white;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
+            transition: all 0.2s;
         }
 
         .filtro-btn i {
-            width: 1.5rem;
+            margin-right: 0.3rem;
         }
 
         .filtro-btn.active {
             background: #0A66C2;
             color: white;
+            border-color: #0A66C2;
         }
 
-        .filtro-btn.active i {
+        .filtro-select, .filtro-input {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.8rem;
+            font-size: 0.9rem;
+            background: #F9FAFB;
+        }
+
+        .rango-distancia {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .rango-distancia input {
+            flex: 1;
+        }
+
+        .btn-geolocalizar {
+            background: #0A66C2;
             color: white;
+            border: none;
+            padding: 0.6rem;
+            border-radius: 0.8rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+
+        .btn-limpiar-filtros {
+            background: #F3F4F6;
+            color: #6B7280;
+            border: 1px solid #E5E7EB;
+            padding: 0.7rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        #map {
+            height: 500px;
+            border-radius: 1.5rem;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1;
         }
 
         .resultados-lista {
@@ -127,15 +181,16 @@
             border-radius: 1.5rem;
             padding: 1.5rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            max-height: 550px;
+            max-height: 380px;
             overflow-y: auto;
+            margin-top: 1rem;
         }
 
         .resultado-item {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
+            padding: 0.8rem;
             border-bottom: 1px solid #F3F4F6;
             cursor: pointer;
             border-radius: 0.8rem;
@@ -148,10 +203,11 @@
         }
 
         .resultado-avatar {
-            width: 55px;
-            height: 55px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             object-fit: cover;
+            background: #E5E7EB;
         }
 
         .resultado-info {
@@ -160,17 +216,23 @@
 
         .resultado-nombre {
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .resultado-oficio {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #6B7280;
         }
 
         .resultado-rating {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #F59E0B;
+            margin-top: 0.2rem;
+        }
+
+        .resultado-distancia {
+            font-size: 0.7rem;
+            color: #10B981;
             margin-top: 0.2rem;
         }
 
@@ -179,6 +241,7 @@
             padding: 0.2rem 0.6rem;
             border-radius: 1rem;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .badge-trabajador {
@@ -189,14 +252,6 @@
         .badge-empleador {
             background: #F3E8FF;
             color: #9333EA;
-        }
-
-        #map {
-            height: 550px;
-            border-radius: 1.5rem;
-            width: 100%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            z-index: 1;
         }
 
         .stats-mapa {
@@ -215,11 +270,19 @@
             font-weight: 600;
         }
 
+        .ubicacion-actual {
+            background: #E8F0FE;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
         @media (max-width: 900px) {
             .mapa-grid {
                 grid-template-columns: 1fr;
             }
-
             #map {
                 height: 400px;
             }
@@ -235,39 +298,112 @@
             <h1><i class="fa-solid fa-map-location-dot"></i> Mapa de profesionales</h1>
             <p>Encuentra trabajadores y empleadores cerca de tu ubicación</p>
             <div class="stats-mapa">
-                <div class="stat-mapa" id="stats-trabajadores"> Cargando...</div>
-                <div class="stat-mapa" id="stats-empleadores"> Cargando...</div>
-                <div class="stat-mapa" id="stats-total"> Cargando...</div>
+                <div class="stat-mapa" id="stats-trabajadores">👷 Cargando...</div>
+                <div class="stat-mapa" id="stats-empleadores">🏢 Cargando...</div>
+                <div class="stat-mapa" id="stats-total">📊 Cargando...</div>
             </div>
         </div>
 
         <div class="mapa-grid">
             <div class="filtros-panel">
-                <div class="filtros-titulo"><i class="fa-solid fa-filter"></i> Filtrar búsqueda</div>
+                <div class="filtros-titulo"><i class="fa-solid fa-sliders-h"></i> Filtros avanzados</div>
+
+                <!-- Tipo de usuario -->
                 <div class="filtro-grupo">
-                    <label class="filtro-label">Tipo de usuario</label>
+                    <label class="filtro-label"><i class="fa-solid fa-users"></i> Tipo</label>
                     <div class="filtro-botones">
-                        <button class="filtro-btn active" data-tipo="todos"><i class="fa-solid fa-globe"></i>
-                            Todos</button>
-                        <button class="filtro-btn" data-tipo="trabajadores"><i class="fa-solid fa-hard-hat"></i>
-                            Trabajadores</button>
-                        <button class="filtro-btn" data-tipo="empleadores"><i class="fa-solid fa-building"></i>
-                            Empleadores</button>
+                        <button class="filtro-btn active" data-tipo="todos"><i class="fa-solid fa-globe"></i> Todos</button>
+                        <button class="filtro-btn" data-tipo="trabajador"><i class="fa-solid fa-hard-hat"></i> Trabajadores</button>
+                        <button class="filtro-btn" data-tipo="empleador"><i class="fa-solid fa-building"></i> Empleadores</button>
                     </div>
                 </div>
+
+                <!-- Oficio -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label"><i class="fa-solid fa-briefcase"></i> Oficio</label>
+                    <select id="filtro-oficio" class="filtro-select">
+                        <option value="">Todos los oficios</option>
+                        <option value="electricista">⚡ Electricista</option>
+                        <option value="plomero">🔧 Plomero</option>
+                        <option value="carpintero">🪵 Carpintero</option>
+                        <option value="cocinero">🍳 Cocinero</option>
+                        <option value="limpieza">🧹 Limpieza</option>
+                        <option value="construcción">🏗️ Construcción</option>
+                        <option value="pintor">🎨 Pintor</option>
+                        <option value="jardinero">🌿 Jardinero</option>
+                        <option value="mecánico">🔧 Mecánico</option>
+                    </select>
+                </div>
+
+                <!-- Años de experiencia -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label"><i class="fa-solid fa-chart-line"></i> Experiencia</label>
+                    <select id="filtro-experiencia" class="filtro-select">
+                        <option value="">Toda experiencia</option>
+                        <option value="0-2">🌱 0-2 años (Principiante)</option>
+                        <option value="3-5">📈 3-5 años (Intermedio)</option>
+                        <option value="6-10">⭐ 6-10 años (Avanzado)</option>
+                        <option value="10+">🏆 10+ años (Experto)</option>
+                    </select>
+                </div>
+
+                <!-- Puntuación mínima -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label"><i class="fa-solid fa-star"></i> Calificación mínima</label>
+                    <select id="filtro-puntuacion" class="filtro-select">
+                        <option value="0">Cualquier puntuación</option>
+                        <option value="1">⭐ 1 estrella o más</option>
+                        <option value="2">⭐⭐ 2 estrellas o más</option>
+                        <option value="3">⭐⭐⭐ 3 estrellas o más</option>
+                        <option value="4">⭐⭐⭐⭐ 4 estrellas o más</option>
+                        <option value="5">⭐⭐⭐⭐⭐ Solo 5 estrellas</option>
+                    </select>
+                </div>
+
+                <!-- Ciudad -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label"><i class="fa-solid fa-city"></i> Ciudad</label>
+                    <select id="filtro-ciudad" class="filtro-select">
+                        <option value="">Todas las ciudades</option>
+                        <option value="la paz">🏔️ La Paz</option>
+                        <option value="santa cruz">🌴 Santa Cruz</option>
+                        <option value="cochabamba">🌄 Cochabamba</option>
+                        <option value="el alto">🏙️ El Alto</option>
+                        <option value="sucre">📜 Sucre</option>
+                        <option value="potosi">⛰️ Potosí</option>
+                        <option value="tarija">🍷 Tarija</option>
+                        <option value="oruro">🎭 Oruro</option>
+                    </select>
+                </div>
+
+                <!-- Distancia (cerca de mí) -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label"><i class="fa-solid fa-location-dot"></i> Cerca de mí</label>
+                    <div class="rango-distancia">
+                        <input type="number" id="distancia-radio" placeholder="Radio" min="100" max="50000" step="100" value="5000">
+                        <select id="distancia-unidad" class="filtro-select" style="width: auto;">
+                            <option value="m">metros</option>
+                            <option value="km" selected>km</option>
+                        </select>
+                    </div>
+                    <input type="text" id="ubicacion-busqueda" class="filtro-input" placeholder="Escribe tu ubicación...">
+                    <button class="btn-geolocalizar" id="btn-geolocalizar"><i class="fa-solid fa-location-crosshairs"></i> Usar mi ubicación actual</button>
+                    <div id="ubicacion-actual-info" class="ubicacion-actual" style="display: none;">
+                        <i class="fa-solid fa-check-circle"></i> Ubicación seleccionada
+                    </div>
+                </div>
+
+                <button id="btn-limpiar" class="btn-limpiar-filtros"><i class="fa-solid fa-trash-alt"></i> Limpiar todos los filtros</button>
             </div>
 
             <div>
                 <div id="map"></div>
-                <div class="resultados-lista" style="margin-top: 1rem;">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <div class="filtros-titulo"
-                            style="margin-top: 0; margin-bottom: 0; border-bottom: none; padding-bottom: 0;">
-                            <i class="fa-solid fa-list"></i> Profesionales
+                <div class="resultados-lista">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div class="filtros-titulo" style="margin:0; border:none; padding:0;">
+                            <i class="fa-solid fa-list"></i> Profesionales encontrados
                         </div>
-                        <span id="resultados-count"
-                            style="background: #E8F0FE; padding: 0.3rem 0.8rem; border-radius: 2rem; font-weight: 600;">(0)</span>
+                        <span id="resultados-count" style="background: #E8F0FE; padding: 0.3rem 0.8rem; border-radius: 2rem; font-weight: 600;">(0)</span>
                     </div>
                     <div id="lista-resultados">
                         <div style="text-align: center; padding: 2rem;">
@@ -280,36 +416,63 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script>
         let map, markers = [];
         let currentTipo = 'todos';
-        let ubicacionesReales = [];
+        let todasUbicaciones = [];
+        let ubicacionUsuario = null;
+        let geocoder;
 
         // Coordenadas por ciudad
         const coordenadasCiudades = {
             'la paz': [-16.5000, -68.1500],
-            'sopocachi': [-16.5078, -68.1224],
-            'calacoto': [-16.5287, -68.0763],
-            'obrajes': [-16.5139, -68.1027],
-            'miraflores': [-16.4945, -68.1275],
-            'cochabamba': [-17.3895, -66.1568],
             'santa cruz': [-17.7836, -63.1821],
+            'cochabamba': [-17.3895, -66.1568],
             'el alto': [-16.5100, -68.1700],
             'sucre': [-19.0333, -65.2627],
             'potosi': [-19.5836, -65.7531],
             'tarija': [-21.5355, -64.7295],
-            'oruro': [-17.9667, -67.1167]
+            'oruro': [-17.9667, -67.1167],
+            'trinidad': [-14.8333, -64.9000],
+            'cobija': [-11.0267, -68.7692]
         };
 
-        function obtenerCoordenadas(ubicacion) {
-            if (!ubicacion) return [-16.5000, -68.1500];
+        // Función para calcular distancia entre dos puntos (Haversine)
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radio de la Tierra en km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function obtenerCoordenadasDesdeTexto(texto, callback) {
+            if (geocoder) {
+                geocoder.geocode(texto, function(results) {
+                    if (results && results.length > 0) {
+                        callback(results[0].center);
+                    } else {
+                        callback(null);
+                    }
+                });
+            } else {
+                callback(null);
+            }
+        }
+
+        function obtenerCoordenadasCiudad(ubicacion) {
+            if (!ubicacion) return null;
             const ubicacionLower = ubicacion.toLowerCase();
             for (const [key, coord] of Object.entries(coordenadasCiudades)) {
                 if (ubicacionLower.includes(key)) {
-                    return coord;
+                    return { lat: coord[0], lng: coord[1] };
                 }
             }
-            return [-16.5000, -68.1500];
+            return null;
         }
 
         function initMap() {
@@ -319,67 +482,98 @@
                 subdomains: 'abcd',
                 maxZoom: 19
             }).addTo(map);
-            cargarUbicacionesReales();
+
+            // Inicializar geocoder
+            geocoder = new L.Control.Geocoder.Nominatim();
+
+            cargarUbicaciones();
         }
 
-        function cargarUbicacionesReales() {
+        function cargarUbicaciones() {
             fetch(`/api/ubicaciones/?tipo=${currentTipo}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data && data.ubicaciones && data.ubicaciones.length > 0) {
-                        ubicacionesReales = data.ubicaciones;
-                        // Procesar ubicaciones reales
-                        const ubicacionesProcesadas = ubicacionesReales.map(u => ({
+                    if (data && data.ubicaciones) {
+                        todasUbicaciones = data.ubicaciones.map(u => ({
                             id: u.id,
                             nombre: u.nombre,
                             tipo: u.tipo,
-                            oficio: u.oficio,
+                            oficio: (u.oficio || '').toLowerCase(),
                             ubicacion: u.ubicacion,
-                            lat: u.lat || obtenerCoordenadas(u.ubicacion)[0],
-                            lng: u.lng || obtenerCoordenadas(u.ubicacion)[1],
-                            calificacion: u.calificacion,
+                            lat: parseFloat(u.lat) || (obtenerCoordenadasCiudad(u.ubicacion)?.lat || -16.5000),
+                            lng: parseFloat(u.lng) || (obtenerCoordenadasCiudad(u.ubicacion)?.lng || -68.1500),
+                            calificacion: u.calificacion || 0,
+                            anios_experiencia: u.anios_experiencia || 0,
                             disponible: u.disponible,
                             foto: u.foto
                         }));
-                        actualizarMapa(ubicacionesProcesadas);
-                        actualizarLista(ubicacionesProcesadas);
-                        actualizarStats(ubicacionesProcesadas);
                     } else {
-                        // Si no hay datos reales, usar datos de prueba
-                        usarDatosPrueba();
+                        todasUbicaciones = [];
                     }
+                    aplicarFiltros();
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    usarDatosPrueba();
+                    todasUbicaciones = [];
+                    aplicarFiltros();
                 });
         }
 
-        function usarDatosPrueba() {
-            const datosPrueba = {
-                trabajadores: [
-                    { id: 1, nombre: "Juan Perez", oficio: "Electricista", lat: -16.5000, lng: -68.1500, calificacion: 4.5, disponible: true, tipo: 'trabajador', ubicacion: "La Paz" },
-                    { id: 2, nombre: "Carlos Lopez", oficio: "Plomero", lat: -16.5100, lng: -68.1400, calificacion: 4.0, disponible: true, tipo: 'trabajador', ubicacion: "La Paz" },
-                    { id: 3, nombre: "Maria Flores", oficio: "Carpintero", lat: -16.4900, lng: -68.1600, calificacion: 5.0, disponible: false, tipo: 'trabajador', ubicacion: "La Paz" },
-                    { id: 4, nombre: "Pedro Mamani", oficio: "Electricista", lat: -16.5200, lng: -68.1300, calificacion: 4.2, disponible: true, tipo: 'trabajador', ubicacion: "El Alto" },
-                    { id: 5, nombre: "Ana Condori", oficio: "Cocinera", lat: -16.4800, lng: -68.1700, calificacion: 4.8, disponible: true, tipo: 'trabajador', ubicacion: "Cochabamba" },
-                    { id: 10, nombre: "Constructora ABC", oficio: "Construcción", lat: -16.5050, lng: -68.1450, calificacion: 4.3, tipo: 'empleador', ubicacion: "Santa Cruz" },
-                    { id: 11, nombre: "Restaurante El Sabor", oficio: "Restaurante", lat: -16.5150, lng: -68.1550, calificacion: 4.6, tipo: 'empleador', ubicacion: "Sucre" },
-                    { id: 12, nombre: "Taller Mecánico", oficio: "Mecánica", lat: -16.4950, lng: -68.1350, calificacion: 4.1, tipo: 'empleador', ubicacion: "Potosi" }
-                ]
-            };
+        function aplicarFiltros() {
+            const oficioFiltro = document.getElementById('filtro-oficio').value.toLowerCase();
+            const experienciaFiltro = document.getElementById('filtro-experiencia').value;
+            const puntuacionMin = parseInt(document.getElementById('filtro-puntuacion').value) || 0;
+            const ciudadFiltro = document.getElementById('filtro-ciudad').value.toLowerCase();
+            const radioValor = parseFloat(document.getElementById('distancia-radio').value) || 5;
+            const unidad = document.getElementById('distancia-unidad').value;
+            let radioKm = unidad === 'm' ? radioValor / 1000 : radioValor;
 
-            let ubicaciones = [];
-            if (currentTipo === 'todos' || currentTipo === 'trabajadores') {
-                ubicaciones.push(...datosPrueba.trabajadores.filter(t => t.tipo === 'trabajador'));
-            }
-            if (currentTipo === 'todos' || currentTipo === 'empleadores') {
-                ubicaciones.push(...datosPrueba.trabajadores.filter(t => t.tipo === 'empleador'));
+            let filtradas = [...todasUbicaciones];
+
+            // Filtrar por tipo
+            if (currentTipo !== 'todos') {
+                filtradas = filtradas.filter(u => u.tipo === currentTipo);
             }
 
-            actualizarMapa(ubicaciones);
-            actualizarLista(ubicaciones);
-            actualizarStats(ubicaciones);
+            // Filtrar por oficio
+            if (oficioFiltro) {
+                filtradas = filtradas.filter(u => u.oficio.includes(oficioFiltro));
+            }
+
+            // Filtrar por experiencia
+            if (experienciaFiltro) {
+                const [min, max] = experienciaFiltro.split('-');
+                if (max === '+') {
+                    filtradas = filtradas.filter(u => u.anios_experiencia >= parseInt(min));
+                } else {
+                    filtradas = filtradas.filter(u => u.anios_experiencia >= parseInt(min) && u.anios_experiencia <= parseInt(max));
+                }
+            }
+
+            // Filtrar por puntuación
+            if (puntuacionMin > 0) {
+                filtradas = filtradas.filter(u => u.calificacion >= puntuacionMin);
+            }
+
+            // Filtrar por ciudad
+            if (ciudadFiltro) {
+                filtradas = filtradas.filter(u => u.ubicacion.toLowerCase().includes(ciudadFiltro));
+            }
+
+            // Filtrar por distancia si hay ubicación de usuario
+            if (ubicacionUsuario && radioKm > 0) {
+                filtradas = filtradas.filter(u => {
+                    const distancia = calcularDistancia(ubicacionUsuario.lat, ubicacionUsuario.lng, u.lat, u.lng);
+                    u.distancia = distancia;
+                    return distancia <= radioKm;
+                });
+                // Ordenar por distancia
+                filtradas.sort((a, b) => (a.distancia || Infinity) - (b.distancia || Infinity));
+            }
+
+            actualizarMapa(filtradas);
+            actualizarLista(filtradas);
+            actualizarStats(filtradas);
         }
 
         function actualizarMapa(ubicaciones) {
@@ -387,44 +581,62 @@
             markers = [];
 
             if (ubicaciones.length === 0) {
-                document.getElementById('lista-resultados').innerHTML = '<div style="text-align:center;padding:2rem;">No hay profesionales disponibles</div>';
+                document.getElementById('lista-resultados').innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fa-regular fa-face-frown"></i> No hay profesionales con esos filtros</div>';
                 return;
             }
 
             let bounds = L.latLngBounds();
+            if (ubicacionUsuario) {
+                bounds.extend([ubicacionUsuario.lat, ubicacionUsuario.lng]);
+            }
 
             ubicaciones.forEach(u => {
                 if (!u.lat || !u.lng) return;
                 bounds.extend([u.lat, u.lng]);
 
                 const color = u.tipo === 'trabajador' ? '#0A66C2' : '#9333EA';
+                const experienciaNivel = u.anios_experiencia >= 10 ? '🏆' : (u.anios_experiencia >= 5 ? '⭐' : (u.anios_experiencia >= 2 ? '📈' : '🌱'));
+                
                 const icono = L.divIcon({
-                    html: `<div style="background:${color};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);font-size:18px;">
+                    html: `<div style="background:${color};width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);font-size:18px;position:relative;">
                                 <i class="fas ${u.tipo === 'trabajador' ? 'fa-hard-hat' : 'fa-building'}"></i>
                                 ${u.disponible ? '<div style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;background:#10B981;border-radius:50%;border:2px solid white;"></div>' : ''}
                           </div>`,
                     className: 'custom-div-icon',
-                    iconSize: [40, 40],
-                    popupAnchor: [0, -20]
+                    iconSize: [42, 42],
+                    popupAnchor: [0, -21]
                 });
 
                 const marker = L.marker([u.lat, u.lng], { icon: icono }).addTo(map);
                 const estrellas = '⭐'.repeat(Math.floor(u.calificacion)) + '☆'.repeat(5 - Math.floor(u.calificacion));
+                const distanciaTexto = u.distancia ? `<div style="font-size:0.7rem;color:#10B981;"><i class="fa-solid fa-location-dot"></i> A ${u.distancia.toFixed(1)} km de ti</div>` : '';
 
                 marker.bindPopup(`
                     <div style="text-align:center;min-width:220px;padding:0.3rem;">
                         <div style="font-weight:700;font-size:1.1rem;margin-bottom:0.3rem;">${u.nombre}</div>
                         <div style="font-size:0.85rem;color:#0A66C2;"><strong>${u.oficio}</strong></div>
-                        <div style="font-size:0.8rem;margin:0.3rem 0;">${estrellas} (${u.calificacion})</div>
-                        <div style="font-size:0.75rem;color:#6B7280;"><i class="fas fa-map-marker-alt"></i> ${u.ubicacion || 'Bolivia'}</div>
-                        ${u.disponible ? '<div style="margin-top:0.3rem;"><span style="background:#10B981;color:white;padding:0.2rem 0.8rem;border-radius:20px;font-size:0.7rem;">Disponible</span></div>' : ''}
+                        <div style="font-size:0.75rem;margin:0.2rem 0;">${experienciaNivel} ${u.anios_experiencia} años de experiencia</div>
+                        <div style="font-size:0.8rem;margin:0.2rem 0;">${estrellas} (${u.calificacion})</div>
+                        ${distanciaTexto}
+                        <div style="font-size:0.7rem;color:#6B7280;"><i class="fas fa-map-marker-alt"></i> ${u.ubicacion || 'Bolivia'}</div>
+                        ${u.disponible ? '<div style="margin-top:0.3rem;"><span style="background:#10B981;color:white;padding:0.2rem 0.8rem;border-radius:20px;font-size:0.7rem;">Disponible</span></div>' : '<div style="margin-top:0.3rem;"><span style="background:#EF4444;color:white;padding:0.2rem 0.8rem;border-radius:20px;font-size:0.7rem;">No disponible</span></div>'}
                         <a href="/perfil-trabajador/${u.id}/" style="display:inline-block;margin-top:0.5rem;padding:0.3rem 1rem;background:#0A66C2;color:white;border-radius:20px;text-decoration:none;font-size:0.75rem;">Ver perfil →</a>
                     </div>
                 `);
                 markers.push(marker);
             });
 
-            if (markers.length > 0) {
+            if (ubicacionUsuario) {
+                const iconoUsuario = L.divIcon({
+                    html: `<div style="background:#10B981;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;border:2px solid white;font-size:14px;"><i class="fas fa-user"></i></div>`,
+                    className: 'custom-div-icon',
+                    iconSize: [30, 30]
+                });
+                L.marker([ubicacionUsuario.lat, ubicacionUsuario.lng], { icon: iconoUsuario }).addTo(map)
+                    .bindPopup('<div style="text-align:center;"><strong>¡Tú estás aquí!</strong></div>');
+            }
+
+            if (markers.length > 0 || ubicacionUsuario) {
                 map.fitBounds(bounds);
             }
         }
@@ -434,19 +646,24 @@
             document.getElementById('resultados-count').innerHTML = `(${ubicaciones.length})`;
 
             if (ubicaciones.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fa-regular fa-face-frown"></i> No hay profesionales</div>';
+                container.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fa-regular fa-face-frown"></i> No hay profesionales con estos filtros</div>';
                 return;
             }
 
             let html = '';
             ubicaciones.forEach(u => {
                 const estrellas = '⭐'.repeat(Math.floor(u.calificacion)) + '☆'.repeat(5 - Math.floor(u.calificacion));
+                const experienciaIcon = u.anios_experiencia >= 10 ? '🏆' : (u.anios_experiencia >= 5 ? '⭐' : (u.anios_experiencia >= 2 ? '📈' : '🌱'));
+                const distanciaTexto = u.distancia ? `<div class="resultado-distancia"><i class="fa-solid fa-location-dot"></i> A ${u.distancia.toFixed(1)} km</div>` : '';
+                
                 html += `
                     <div class="resultado-item" onclick="window.location.href='/perfil-trabajador/${u.id}/'">
+                        <img class="resultado-avatar" src="${u.foto || 'https://ui-avatars.com/api/?background=0A66C2&color=fff&name=' + encodeURIComponent(u.nombre)}">
                         <div class="resultado-info">
                             <div class="resultado-nombre">${u.nombre} ${u.disponible ? '<span style="background:#10B981;color:white;padding:0.1rem 0.5rem;border-radius:1rem;font-size:0.6rem;margin-left:0.3rem;">Disponible</span>' : ''}</div>
                             <div class="resultado-oficio"><i class="fas ${u.tipo === 'trabajador' ? 'fa-hard-hat' : 'fa-building'}"></i> ${u.oficio}</div>
-                            <div class="resultado-rating">${estrellas}</div>
+                            <div class="resultado-rating">${estrellas} <span style="color:#6B7280;">(${u.calificacion})</span> ${experienciaIcon} ${u.anios_experiencia} años</div>
+                            ${distanciaTexto}
                         </div>
                         <span class="resultado-badge ${u.tipo === 'trabajador' ? 'badge-trabajador' : 'badge-empleador'}">
                             ${u.tipo === 'trabajador' ? '👷 Trabajador' : '🏢 Empleador'}
@@ -460,18 +677,74 @@
         function actualizarStats(ubicaciones) {
             const trabajadores = ubicaciones.filter(u => u.tipo === 'trabajador').length;
             const empleadores = ubicaciones.filter(u => u.tipo === 'empleador').length;
-            document.getElementById('stats-trabajadores').innerHTML = ` Trabajadores: ${trabajadores}`;
-            document.getElementById('stats-empleadores').innerHTML = ` Empleadores: ${empleadores}`;
-            document.getElementById('stats-total').innerHTML = ` Total: ${ubicaciones.length}`;
+            document.getElementById('stats-trabajadores').innerHTML = `👷 Trabajadores: ${trabajadores}`;
+            document.getElementById('stats-empleadores').innerHTML = `🏢 Empleadores: ${empleadores}`;
+            document.getElementById('stats-total').innerHTML = `📊 Total: ${ubicaciones.length}`;
         }
 
+        function limpiarFiltros() {
+            document.getElementById('filtro-oficio').value = '';
+            document.getElementById('filtro-experiencia').value = '';
+            document.getElementById('filtro-puntuacion').value = '0';
+            document.getElementById('filtro-ciudad').value = '';
+            document.getElementById('ubicacion-busqueda').value = '';
+            document.getElementById('distancia-radio').value = '5';
+            document.getElementById('distancia-unidad').value = 'km';
+            ubicacionUsuario = null;
+            document.getElementById('ubicacion-actual-info').style.display = 'none';
+            aplicarFiltros();
+        }
+
+        // Event listeners
         document.querySelectorAll('[data-tipo]').forEach(btn => {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('[data-tipo]').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 currentTipo = this.dataset.tipo;
-                cargarUbicacionesReales();
+                cargarUbicaciones();
             });
+        });
+
+        document.getElementById('filtro-oficio').addEventListener('change', () => aplicarFiltros());
+        document.getElementById('filtro-experiencia').addEventListener('change', () => aplicarFiltros());
+        document.getElementById('filtro-puntuacion').addEventListener('change', () => aplicarFiltros());
+        document.getElementById('filtro-ciudad').addEventListener('change', () => aplicarFiltros());
+        document.getElementById('distancia-radio').addEventListener('input', () => aplicarFiltros());
+        document.getElementById('distancia-unidad').addEventListener('change', () => aplicarFiltros());
+        document.getElementById('btn-limpiar').addEventListener('click', limpiarFiltros);
+
+        document.getElementById('btn-geolocalizar').addEventListener('click', () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    ubicacionUsuario = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    document.getElementById('ubicacion-actual-info').innerHTML = `<i class="fa-solid fa-check-circle"></i> Ubicación: ${ubicacionUsuario.lat.toFixed(4)}, ${ubicacionUsuario.lng.toFixed(4)}`;
+                    document.getElementById('ubicacion-actual-info').style.display = 'block';
+                    aplicarFiltros();
+                }, () => {
+                    alert('No se pudo obtener tu ubicación. Verifica los permisos.');
+                });
+            } else {
+                alert('Tu navegador no soporta geolocalización');
+            }
+        });
+
+        document.getElementById('ubicacion-busqueda').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const texto = this.value;
+                obtenerCoordenadasDesdeTexto(texto, (coords) => {
+                    if (coords) {
+                        ubicacionUsuario = { lat: coords.lat, lng: coords.lng };
+                        document.getElementById('ubicacion-actual-info').innerHTML = `<i class="fa-solid fa-check-circle"></i> Ubicación: ${texto}`;
+                        document.getElementById('ubicacion-actual-info').style.display = 'block';
+                        aplicarFiltros();
+                    } else {
+                        alert('No se encontró la ubicación');
+                    }
+                });
+            }
         });
 
         initMap();

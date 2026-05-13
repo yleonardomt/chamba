@@ -132,7 +132,9 @@ class Oferta(models.Model):
     fecha_limite = models.DateField(blank=True, null=True)
     activa = models.BooleanField(default=True)
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
-
+    # En models.py, dentro de la clase Oferta:
+    latitud = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitud = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     def __str__(self):
         return self.titulo
 
@@ -154,7 +156,9 @@ class Servicio(models.Model):
     precio = models.CharField(max_length=100, blank=True)
     disponible = models.BooleanField(default=True)
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
-
+    # En models.py, dentro de la clase Servicio:
+    latitud = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitud = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     def __str__(self):
         return self.titulo
 
@@ -218,6 +222,8 @@ class Calificacion(models.Model):
         blank=True,
         related_name="calificaciones",
     )
+    
+    
 
     puntuacion = models.IntegerField(choices=CALIFICACION_CHOICES)
     comentario = models.TextField(blank=True, null=True)

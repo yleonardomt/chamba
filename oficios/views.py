@@ -4,8 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.utils import timezone
-from .models import Perfil, Publicacion, Like, Comentario, Oferta, Servicio
-from .models import PortafolioFoto
+from django.db import models
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib import messages
 from .models import (
     Perfil,
     Publicacion,
@@ -16,14 +21,6 @@ from .models import (
     PortafolioFoto,
     Calificacion,
 )
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.core.mail import send_mail
-from django.conf import settings
-from django.contrib import messages
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 
 
 # ========== VISTAS PÚBLICAS ==========
@@ -35,7 +32,7 @@ def login_view(request):
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
-        remember_me = request.POST.get("remember_me")  # 👈 Capturar el checkbox
+        remember_me = request.POST.get("remember_me")
 
         user_obj = User.objects.filter(email=email).first()
 
@@ -48,16 +45,66 @@ def login_view(request):
             login(request, user)
 
             if remember_me:
-                request.session.set_expiry(2592000)  # 30 días en segundos
+                request.session.set_expiry(2592000)  
             else:
                 request.session.set_expiry(0)
 
-            return redirect("dashboard")
+            if user.is_superuser or user.is_staff:
+                return redirect("dashboard_admin")
+            else:
+                return redirect("dashboard")
         else:
             return render(request, "login.html", {"error": "Credenciales incorrectas"})
 
     return render(request, "login.html")
 
+
+
+@login_required
+def dashboard_admin(request):
+    # Verificar que sea administrador
+    if not request.user.is_superuser and not request.user.is_staff:
+        return redirect('dashboard')
+    
+    # Estadísticas para el panel de admin
+    total_usuarios = User.objects.count()
+    total_trabajadores = Perfil.objects.filter(tipo='trabajador').count()
+    total_empleadores = Perfil.objects.filter(tipo='empleador').count()
+    total_publicaciones = Publicacion.objects.count()
+    total_ofertas = Oferta.objects.count()
+    total_servicios = Servicio.objects.count()
+    total_comentarios = Comentario.objects.count()
+    
+    # Últimos usuarios registrados
+    ultimos_usuarios = User.objects.order_by('-date_joined')[:10]
+    
+    # Últimas publicaciones
+    ultimas_publicaciones = Publicacion.objects.all().order_by('-fecha_creacion')[:10]
+    
+    # Usuarios por mes (para gráfico)
+    from django.db.models.functions import TruncMonth
+    from django.db.models import Count
+    from datetime import datetime, timedelta
+    
+    usuarios_por_mes = User.objects.annotate(
+        mes=TruncMonth('date_joined')
+    ).values('mes').annotate(
+        total=Count('id')
+    ).order_by('-mes')[:6]
+    
+    context = {
+        'total_usuarios': total_usuarios,
+        'total_trabajadores': total_trabajadores,
+        'total_empleadores': total_empleadores,
+        'total_publicaciones': total_publicaciones,
+        'total_ofertas': total_ofertas,
+        'total_servicios': total_servicios,
+        'total_comentarios': total_comentarios,
+        'ultimos_usuarios': ultimos_usuarios,
+        'ultimas_publicaciones': ultimas_publicaciones,
+        'usuarios_por_mes': usuarios_por_mes,
+    }
+    return render(request, "dashboard_admin.html", context)
 
 def recuperar_password(request):
     """Vista para solicitar recuperación de contraseña"""
@@ -259,6 +306,7 @@ def listar_comentarios(request, publicacion_id):
         "comentarios": [
             {
                 "usuario": c.usuario.get_full_name() or c.usuario.username,
+                "usuario_id": c.usuario.id,  # <-- AGREGAR ESTA LÍNEA
                 "texto": c.texto,
                 "fecha": c.fecha.strftime("%d/%m/%Y %H:%M"),
             }
@@ -280,6 +328,8 @@ def publicar_oferta(request):
             ubicacion=request.POST.get("ubicacion"),
             remuneracion=request.POST.get("remuneracion", ""),
             fecha_limite=request.POST.get("fecha_limite") or None,
+              latitud=request.POST.get("latitud") or None,  
+            longitud=request.POST.get("longitud") or None,  
         )
 
         Publicacion.objects.create(
@@ -310,6 +360,8 @@ def ofrecer_servicio(request):
             descripcion=request.POST.get("descripcion"),
             ubicacion=request.POST.get("ubicacion"),
             precio=request.POST.get("precio", ""),
+            latitud=request.POST.get("latitud") or None,
+            longitud=request.POST.get("longitud") or None, 
         )
 
         Publicacion.objects.create(
@@ -369,6 +421,7 @@ def api_oferta_detalle(request, oferta_id):
             else f"https://ui-avatars.com/api/?background=0A66C2&color=fff&name={oferta.empleador.username}"
         ),
         "tipo": "oferta",
+        "es_propia": oferta.empleador == request.user,
     }
     return JsonResponse(data)
 
@@ -537,10 +590,6 @@ def eliminar_portafolio(request, foto_id):
     foto = get_object_or_404(PortafolioFoto, id=foto_id, trabajador=request.user)
     foto.delete()
     return redirect("perfil")
-
-
-from django.db import models
-from .models import Oferta, Servicio, Perfil
 
 
 @login_required
@@ -822,27 +871,184 @@ def mapa(request):
 
 @login_required
 def api_ubicaciones(request):
-    tipo = request.GET.get('tipo', 'todos')
-    
-    perfiles = Perfil.objects.all().select_related('usuario')
-    
-    if tipo == 'trabajadores':
-        perfiles = perfiles.filter(tipo='trabajador')
-    elif tipo == 'empleadores':
-        perfiles = perfiles.filter(tipo='empleador')
-    
-    # Coordenadas detalladas
+    tipo = request.GET.get("tipo", "todos")
+
+    perfiles = Perfil.objects.all().select_related("usuario")
+
+    if tipo == "trabajadores":
+        perfiles = perfiles.filter(tipo="trabajador")
+    elif tipo == "empleadores":
+        perfiles = perfiles.filter(tipo="empleador")
+
+    ubicaciones = []
+    for perfil in perfiles:
+        if perfil.ubicacion and perfil.ubicacion != "No especificada":
+            # Intentar obtener coordenadas reales de ofertas/servicios
+            lat, lng = None, None
+            if perfil.tipo == "trabajador":
+                # Buscar en servicios
+                servicio = Servicio.objects.filter(trabajador=perfil.usuario, latitud__isnull=False).first()
+                if servicio and servicio.latitud:
+                    lat, lng = float(servicio.latitud), float(servicio.longitud)
+            else:
+                # Buscar en ofertas
+                oferta = Oferta.objects.filter(empleador=perfil.usuario, latitud__isnull=False).first()
+                if oferta and oferta.latitud:
+                    lat, lng = float(oferta.latitud), float(oferta.longitud)
+
+            if not lat:
+                # Usar coordenadas por ciudad
+                coords = obtener_coords_ciudad(perfil.ubicacion)
+                lat, lng = coords[0], coords[1]
+
+            ubicaciones.append({
+                "id": perfil.usuario.id,
+                "nombre": perfil.usuario.get_full_name() or perfil.usuario.username,
+                "tipo": perfil.tipo,
+                "ubicacion": perfil.ubicacion,
+                "lat": lat,
+                "lng": lng,
+                "oficio": perfil.oficios or (perfil.nombre_empresa if perfil.tipo == "empleador" else "Trabajador"),
+                "foto": perfil.foto_perfil.url if perfil.foto_perfil else None,
+                "calificacion": float(perfil.promedio_calificacion or 0),
+                "disponible": perfil.disponible if perfil.tipo == "trabajador" else None,
+                "anios_experiencia": perfil.anios_experiencia or 0,  # 👈 AGREGAR ESTO
+            })
+
+    return JsonResponse({"ubicaciones": ubicaciones})
+
+
+@login_required
+def api_todos_trabajadores(request):
+    """API para obtener todos los trabajadores"""
+    trabajadores = Perfil.objects.filter(tipo="trabajador").select_related("usuario")
+
+    data = []
+    for t in trabajadores:
+        data.append(
+            {
+                "id": t.usuario.id,
+                "nombre": t.usuario.get_full_name() or t.usuario.username,
+                "oficio": t.oficios or "Trabajador",
+                "foto": t.foto_perfil.url if t.foto_perfil else None,
+                "calificacion": float(t.promedio_calificacion or 0),
+                "total_calificaciones": t.total_calificaciones or 0,
+                "disponible": t.disponible,
+            }
+        )
+
+    return JsonResponse({"trabajadores": data})
+
+
+#
+
+
+@login_required
+def editar_publicacion(request, pk):
+    pub = get_object_or_404(Publicacion, pk=pk, usuario=request.user)
+    if request.method == "POST":
+        pub.contenido = request.POST.get("contenido")
+        if request.FILES.get("imagen"):
+            pub.imagen = request.FILES["imagen"]
+        elif request.POST.get("eliminar_imagen") == "true":
+            pub.imagen = None
+        pub.save()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False})
+
+
+@login_required
+def eliminar_publicacion(request, pk):
+    pub = get_object_or_404(Publicacion, pk=pk, usuario=request.user)
+    pub.delete()
+    return JsonResponse({"success": True})
+
+
+@login_required
+def editar_comentario(request, pk):
+    comentario = get_object_or_404(Comentario, pk=pk, usuario=request.user)
+    if request.method == "POST":
+        comentario.texto = request.POST.get("texto")
+        comentario.save()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False})
+
+
+@login_required
+def eliminar_comentario(request, pk):
+    comentario = get_object_or_404(Comentario, pk=pk, usuario=request.user)
+    comentario.delete()
+    return JsonResponse({"success": True})
+
+
+@login_required
+def editar_portafolio(request, foto_id):
+    foto = get_object_or_404(PortafolioFoto, id=foto_id, trabajador=request.user)
+    if request.method == "POST":
+        titulo = request.POST.get("titulo", "")
+        descripcion = request.POST.get("descripcion", "")
+        foto.titulo = titulo
+        foto.descripcion = descripcion
+
+        nueva_imagen = request.FILES.get("imagen")
+        if nueva_imagen:
+            # Eliminar imagen anterior si existe (opcional, Django la reemplaza)
+            foto.imagen.delete(save=False)
+            foto.imagen = nueva_imagen
+
+        foto.save()
+
+        response_data = {"success": True}
+        if nueva_imagen:
+            response_data["nueva_imagen"] = foto.imagen.url
+        return JsonResponse(response_data)
+
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+@login_required
+def editar_oferta_api(request, oferta_id):
+    oferta = get_object_or_404(Oferta, id=oferta_id, empleador=request.user)
+    if request.method == "POST":
+        oferta.titulo = request.POST.get("titulo")
+        oferta.oficio = request.POST.get("oficio")
+        oferta.descripcion = request.POST.get("descripcion")
+        oferta.ubicacion = request.POST.get("ubicacion")
+        oferta.remuneracion = request.POST.get("remuneracion", "")
+        oferta.fecha_limite = request.POST.get("fecha_limite") or None
+        oferta.save()
+
+        # Actualizar también la publicación asociada
+        publicacion = Publicacion.objects.filter(
+            usuario=request.user, tipo="oferta"
+        ).first()
+        if publicacion:
+            publicacion.contenido = (
+                f"📢 NUEVA OFERTA: {oferta.titulo}\n\n{oferta.descripcion[:200]}"
+            )
+            publicacion.save()
+
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False})
+
+
+@login_required
+def eliminar_oferta_api(request, oferta_id):
+    oferta = get_object_or_404(Oferta, id=oferta_id, empleador=request.user)
+    # Eliminar también la publicación asociada
+    Publicacion.objects.filter(
+        usuario=request.user, tipo="oferta", contenido__icontains=oferta.titulo
+    ).delete()
+    oferta.delete()
+    return JsonResponse({"success": True})
+
+
+def obtener_coords_ciudad(ubicacion):
+    """Devuelve coordenadas aproximadas según la ciudad"""
     coordenadas = {
         'la paz': [-16.5000, -68.1500],
-        'sopocachi': [-16.5078, -68.1224],
-        'calacoto': [-16.5287, -68.0763],
-        'obrajes': [-16.5139, -68.1027],
-        'miraflores': [-16.4945, -68.1275],
-        'san jorge': [-16.5075, -68.1300],
-        'irpavi': [-16.5280, -68.0950],
-        'achumani': [-16.5342, -68.0865],
-        'cochabamba': [-17.3895, -66.1568],
         'santa cruz': [-17.7836, -63.1821],
+        'cochabamba': [-17.3895, -66.1568],
         'el alto': [-16.5100, -68.1700],
         'sucre': [-19.0333, -65.2627],
         'potosi': [-19.5836, -65.7531],
@@ -851,52 +1057,40 @@ def api_ubicaciones(request):
         'trinidad': [-14.8333, -64.9000],
         'cobija': [-11.0267, -68.7692],
     }
-    
-    def obtener_coords(ubicacion):
-        if not ubicacion:
-            return [-16.5000, -68.1500]
-        ubicacion_lower = ubicacion.lower()
-        for key, coord in coordenadas.items():
-            if key in ubicacion_lower:
-                return coord
+    if not ubicacion:
         return [-16.5000, -68.1500]
-    
-    ubicaciones = []
-    for perfil in perfiles:
-        if perfil.ubicacion and perfil.ubicacion != "No especificada":
-            coords = obtener_coords(perfil.ubicacion)
-            ubicaciones.append({
-                'id': perfil.usuario.id,
-                'nombre': perfil.usuario.get_full_name() or perfil.usuario.username,
-                'tipo': perfil.tipo,
-                'ubicacion': perfil.ubicacion,
-                'lat': coords[0],
-                'lng': coords[1],
-                'oficio': perfil.oficios or (perfil.nombre_empresa if perfil.tipo == 'empleador' else 'Trabajador'),
-                'foto': perfil.foto_perfil.url if perfil.foto_perfil else None,
-                'calificacion': float(perfil.promedio_calificacion or 0),
-                'disponible': perfil.disponible if perfil.tipo == 'trabajador' else None,
-                'anios_experiencia': perfil.anios_experiencia or 0,
-            })
-    
-    return JsonResponse({'ubicaciones': ubicaciones})
-
+    ubicacion_lower = ubicacion.lower()
+    for key, coord in coordenadas.items():
+        if key in ubicacion_lower:
+            return coord
+    return [-16.5000, -68.1500]
 
 @login_required
-def api_todos_trabajadores(request):
-    """API para obtener todos los trabajadores"""
-    trabajadores = Perfil.objects.filter(tipo='trabajador').select_related('usuario')
+def api_usuarios(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'No autorizado'}, status=403)
     
-    data = []
-    for t in trabajadores:
-        data.append({
-            'id': t.usuario.id,
-            'nombre': t.usuario.get_full_name() or t.usuario.username,
-            'oficio': t.oficios or 'Trabajador',
-            'foto': t.foto_perfil.url if t.foto_perfil else None,
-            'calificacion': float(t.promedio_calificacion or 0),
-            'total_calificaciones': t.total_calificaciones or 0,
-            'disponible': t.disponible,
-        })
+    usuarios = User.objects.all().select_related('perfil')
+    data = {
+        'usuarios': [{
+            'id': u.id,
+            'username': u.username,
+            'email': u.email,
+            'first_name': u.first_name,
+            'last_name': u.last_name,
+            'tipo': u.perfil.tipo if hasattr(u, 'perfil') else 'empleador',
+            'is_active': u.is_active,
+            'date_joined': u.date_joined.strftime('%d/%m/%Y')
+        } for u in usuarios]
+    }
+    return JsonResponse(data)
+
+@login_required
+def cambiar_estado_usuario(request, user_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'No autorizado'}, status=403)
     
-    return JsonResponse({'trabajadores': data})
+    usuario = get_object_or_404(User, id=user_id)
+    usuario.is_active = not usuario.is_active
+    usuario.save()
+    return JsonResponse({'success': True, 'is_active': usuario.is_active})
