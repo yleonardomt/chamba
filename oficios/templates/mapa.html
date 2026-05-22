@@ -8,7 +8,6 @@
     <title>Mapa de profesionales - CHAMBA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <link rel="stylesheet" href="{% static 'css/principal.css' %}">
     <style>
         * {
@@ -149,11 +148,23 @@
             background: #0A66C2;
             color: white;
             border: none;
-            padding: 0.6rem;
+            padding: 0.8rem;
             border-radius: 0.8rem;
             cursor: pointer;
             margin-top: 0.5rem;
             width: 100%;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-geolocalizar:hover {
+            background: #004182;
+            transform: translateY(-2px);
         }
 
         .btn-limpiar-filtros {
@@ -386,8 +397,9 @@
                             <option value="km" selected>km</option>
                         </select>
                     </div>
-                    <input type="text" id="ubicacion-busqueda" class="filtro-input" placeholder="Escribe tu ubicación...">
-                    <button class="btn-geolocalizar" id="btn-geolocalizar"><i class="fa-solid fa-location-crosshairs"></i> Usar mi ubicación actual</button>
+                    <button class="btn-geolocalizar" id="btn-geolocalizar">
+                        <i class="fa-solid fa-location-crosshairs"></i> Usar mi ubicación actual
+                    </button>
                     <div id="ubicacion-actual-info" class="ubicacion-actual" style="display: none;">
                         <i class="fa-solid fa-check-circle"></i> Ubicación seleccionada
                     </div>
@@ -450,20 +462,6 @@
             return R * c;
         }
 
-        function obtenerCoordenadasDesdeTexto(texto, callback) {
-            if (geocoder) {
-                geocoder.geocode(texto, function(results) {
-                    if (results && results.length > 0) {
-                        callback(results[0].center);
-                    } else {
-                        callback(null);
-                    }
-                });
-            } else {
-                callback(null);
-            }
-        }
-
         function obtenerCoordenadasCiudad(ubicacion) {
             if (!ubicacion) return null;
             const ubicacionLower = ubicacion.toLowerCase();
@@ -482,9 +480,6 @@
                 subdomains: 'abcd',
                 maxZoom: 19
             }).addTo(map);
-
-            // Inicializar geocoder
-            geocoder = new L.Control.Geocoder.Nominatim();
 
             cargarUbicaciones();
         }
@@ -687,7 +682,6 @@
             document.getElementById('filtro-experiencia').value = '';
             document.getElementById('filtro-puntuacion').value = '0';
             document.getElementById('filtro-ciudad').value = '';
-            document.getElementById('ubicacion-busqueda').value = '';
             document.getElementById('distancia-radio').value = '5';
             document.getElementById('distancia-unidad').value = 'km';
             ubicacionUsuario = null;
@@ -728,22 +722,6 @@
                 });
             } else {
                 alert('Tu navegador no soporta geolocalización');
-            }
-        });
-
-        document.getElementById('ubicacion-busqueda').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const texto = this.value;
-                obtenerCoordenadasDesdeTexto(texto, (coords) => {
-                    if (coords) {
-                        ubicacionUsuario = { lat: coords.lat, lng: coords.lng };
-                        document.getElementById('ubicacion-actual-info').innerHTML = `<i class="fa-solid fa-check-circle"></i> Ubicación: ${texto}`;
-                        document.getElementById('ubicacion-actual-info').style.display = 'block';
-                        aplicarFiltros();
-                    } else {
-                        alert('No se encontró la ubicación');
-                    }
-                });
             }
         });
 

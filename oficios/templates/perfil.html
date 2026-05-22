@@ -30,7 +30,6 @@
             --sombra-lg: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
 
-        /* Contenedor principal */
         .perfil-container {
             max-width: 1200px;
             margin: 2rem auto;
@@ -42,14 +41,8 @@
         }
 
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* ========== HEADER ========== */
@@ -205,7 +198,7 @@
             padding: 1.5rem;
         }
 
-        .col-portafolio {
+        .col-izquierda {
             flex: 1;
             min-width: 0;
         }
@@ -229,7 +222,7 @@
             display: inline-flex;
         }
 
-        /* ========== PORTAFOLIO ========== */
+        /* ========== PORTAFOLIO (solo trabajadores) ========== */
         .portafolio-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -292,25 +285,10 @@
             transition: all 0.2s;
         }
 
-        .edit-foto-btn {
-            color: #0A66C2;
-        }
-
-        .edit-foto-btn:hover {
-            background: #0A66C2;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .delete-foto-btn {
-            color: #EF4444;
-        }
-
-        .delete-foto-btn:hover {
-            background: #EF4444;
-            color: white;
-            transform: scale(1.1);
-        }
+        .edit-foto-btn { color: #0A66C2; }
+        .edit-foto-btn:hover { background: #0A66C2; color: white; transform: scale(1.1); }
+        .delete-foto-btn { color: #EF4444; }
+        .delete-foto-btn:hover { background: #EF4444; color: white; transform: scale(1.1); }
 
         .portafolio-titulo {
             font-size: 0.8rem;
@@ -344,12 +322,6 @@
             border-radius: 0.8rem;
             border: 1px solid var(--borde);
             font-size: 1.2rem;
-            transition: border-color 0.2s;
-        }
-
-        .subir-portafolio-form input[type="text"]:focus {
-            outline: none;
-            border-color: #0A66C2;
         }
 
         .btn-subir-foto {
@@ -369,6 +341,21 @@
         .btn-subir-foto:hover {
             background: #004182;
             transform: translateY(-2px);
+        }
+
+        /* ========== OFERTAS DEL EMPLEADOR ========== */
+        .oferta-empleador-card {
+            background: white;
+            border: 1px solid var(--borde);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .oferta-empleador-card:hover {
+            box-shadow: var(--sombra);
+            transform: translateX(3px);
         }
 
         /* ========== DATOS DE CONTACTO ========== */
@@ -400,11 +387,9 @@
             transition: color 0.2s;
         }
 
-        .edit-icon:hover {
-            color: #004182;
-        }
+        .edit-icon:hover { color: #004182; }
 
-        /* ========== EXPERIENCIA ========== */
+        /* ========== EXPERIENCIA (solo trabajadores) ========== */
         .experiencia-badge {
             background: linear-gradient(135deg, #E8F0FE 0%, #DBEAFE 100%);
             padding: 0.8rem;
@@ -412,7 +397,7 @@
             margin-top: 0.5rem;
         }
 
-        /* ========== DISPONIBILIDAD ========== */
+        /* ========== DISPONIBILIDAD (solo trabajadores) ========== */
         .disponible {
             background: #10B981;
             color: white;
@@ -443,9 +428,7 @@
             transition: all 0.3s ease;
         }
 
-        .publicacion-card:hover {
-            box-shadow: var(--sombra);
-        }
+        .publicacion-card:hover { box-shadow: var(--sombra); }
 
         .publicacion-header {
             display: flex;
@@ -480,20 +463,9 @@
             margin-bottom: 0.5rem;
         }
 
-        .tipo-oferta {
-            background: #E8F0FE;
-            color: #0A66C2;
-        }
-
-        .tipo-servicio {
-            background: #ECFDF5;
-            color: #10B981;
-        }
-
-        .tipo-estado {
-            background: #F3F4F6;
-            color: #6B7280;
-        }
+        .tipo-oferta { background: #E8F0FE; color: #0A66C2; }
+        .tipo-servicio { background: #ECFDF5; color: #10B981; }
+        .tipo-estado { background: #F3F4F6; color: #6B7280; }
 
         .publicacion-contenido {
             font-size: 1.2rem;
@@ -520,8 +492,7 @@
             flex-wrap: wrap;
         }
 
-        .btn-like,
-        .btn-comentar {
+        .btn-like, .btn-comentar {
             background: none;
             border: none;
             cursor: pointer;
@@ -533,14 +504,8 @@
             transition: all 0.2s;
         }
 
-        .btn-like:hover,
-        .btn-comentar:hover {
-            color: #0A66C2;
-        }
-
-        .btn-like i.fa-solid {
-            color: #EF4444;
-        }
+        .btn-like:hover, .btn-comentar:hover { color: #0A66C2; }
+        .btn-like i.fa-solid { color: #EF4444; }
 
         .acciones-publicacion {
             display: flex;
@@ -558,21 +523,10 @@
             transition: all 0.2s;
         }
 
-        .btn-editar-pub {
-            color: #0A66C2;
-        }
-
-        .btn-editar-pub:hover {
-            background: #E8F0FE;
-        }
-
-        .btn-eliminar-pub {
-            color: #EF4444;
-        }
-
-        .btn-eliminar-pub:hover {
-            background: #FEE2E2;
-        }
+        .btn-editar-pub { color: #0A66C2; }
+        .btn-editar-pub:hover { background: #E8F0FE; }
+        .btn-eliminar-pub { color: #EF4444; }
+        .btn-eliminar-pub:hover { background: #FEE2E2; }
 
         /* ========== CALIFICACIONES ========== */
         .calificacion-card {
@@ -613,14 +567,8 @@
         }
 
         @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .modal-edit-content h3 {
@@ -639,30 +587,6 @@
             border-radius: 0.8rem;
             font-size: 1.2rem;
             font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        .modal-edit-content input:focus,
-        .modal-edit-content textarea:focus,
-        .modal-edit-content select:focus {
-            outline: none;
-            border-color: #0A66C2;
-        }
-
-        .modal-edit-content button {
-            background: #0A66C2;
-            color: white;
-            border: none;
-            padding: 0.7rem 1.5rem;
-            border-radius: 2rem;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .modal-edit-content button:hover {
-            background: #004182;
-            transform: translateY(-2px);
         }
 
         .modal-buttons {
@@ -672,7 +596,20 @@
             margin-top: 1rem;
         }
 
-        /* Modal de comentarios */
+        .modal-buttons button {
+            background: #0A66C2;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+        }
+
+        .modal-buttons button:first-child {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+
         .modal-comentarios {
             display: none;
             position: fixed;
@@ -707,9 +644,7 @@
             transition: all 0.2s;
         }
 
-        .comentario-item:hover {
-            background: #F3F4F6;
-        }
+        .comentario-item:hover { background: #F3F4F6; }
 
         .comentario-header {
             display: flex;
@@ -726,63 +661,27 @@
             font-size: 0.8rem;
         }
 
-        /* ========== RESPONSIVE ========== */
         @media (max-width: 900px) {
-            .perfil-two-columns {
-                flex-direction: column;
-            }
-            .portafolio-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .perfil-two-columns { flex-direction: column; }
+            .portafolio-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 768px) {
-            .perfil-container {
-                margin: 1rem;
-                border-radius: 1rem;
-            }
-            .perfil-header {
-                padding: 2rem 1rem;
-            }
-            .perfil-header h1 {
-                font-size: 1.6rem;
-            }
-            .perfil-header p {
-                font-size: 0.9rem;
-            }
-            .perfil-foto {
-                width: 100px;
-                height: 100px;
-            }
-            .edit-foto-btn {
-                padding: 0.3rem 0.8rem;
-                font-size: 0.75rem;
-            }
-            .btn-editar {
-                padding: 0.5rem 1rem;
-                font-size: 1.1rem;
-            }
+            .perfil-container { margin: 1rem; border-radius: 1rem; }
+            .perfil-header { padding: 2rem 1rem; }
+            .perfil-header h1 { font-size: 1.6rem; }
+            .perfil-header p { font-size: 0.9rem; }
+            .perfil-foto { width: 100px; height: 100px; }
+            .edit-foto-btn { padding: 0.3rem 0.8rem; font-size: 0.75rem; }
+            .btn-editar { padding: 0.5rem 1rem; font-size: 1.1rem; }
         }
 
         @media (max-width: 500px) {
-            .portafolio-grid {
-                grid-template-columns: 1fr;
-            }
-            .perfil-header h1 {
-                font-size: 1.3rem;
-            }
-            .perfil-foto {
-                width: 80px;
-                height: 80px;
-            }
-            .info-row {
-                font-size: 1.1rem;
-                flex-wrap: wrap;
-            }
-            .info-label {
-                width: 100%;
-                margin-bottom: 0.3rem;
-            }
+            .portafolio-grid { grid-template-columns: 1fr; }
+            .perfil-header h1 { font-size: 1.3rem; }
+            .perfil-foto { width: 80px; height: 80px; }
+            .info-row { font-size: 1.1rem; flex-wrap: wrap; }
+            .info-label { width: 100%; margin-bottom: 0.3rem; }
         }
     </style>
 </head>
@@ -801,8 +700,7 @@
                     {% if user.perfil.foto_perfil %}
                     <img src="{{ user.perfil.foto_perfil.url }}" class="perfil-foto" id="perfilFoto">
                     {% else %}
-                    <img src="https://ui-avatars.com/api/?background=0A66C2&color=fff&name={{ user.first_name|default:user.username }}"
-                        class="perfil-foto">
+                    <img src="https://ui-avatars.com/api/?background=0A66C2&color=fff&name={{ user.first_name|default:user.username }}" class="perfil-foto">
                     {% endif %}
                 </label>
                 <input type="file" name="foto" id="fotoInput" accept="image/*" style="display: none;">
@@ -841,9 +739,10 @@
         <div class="perfil-two-columns">
 
             <!-- ========== COLUMNA IZQUIERDA ========== -->
-            <div class="col-portafolio">
+            <div class="col-izquierda">
 
-                <!-- PORTAFOLIO -->
+                {% if user.perfil.tipo == 'trabajador' %}
+                <!-- ========== PORTAFOLIO (SOLO TRABAJADORES) ========== -->
                 <div class="seccion-title">
                     <i class="fas fa-images"></i> Portafolio de trabajos
                 </div>
@@ -889,8 +788,9 @@
                     </p>
                     {% endfor %}
                 </div>
+                {% endif %}
 
-                <!-- DATOS DE CONTACTO -->
+                <!-- ========== DATOS DE CONTACTO ========== -->
                 <div class="seccion-title" style="margin-top: 1.5rem;">
                     <i class="fas fa-address-card"></i> Datos de contacto
                 </div>
@@ -906,7 +806,27 @@
                     <div class="info-value">{{ user.email }}</div>
                 </div>
 
-                <!-- AÑOS DE EXPERIENCIA -->
+                <!-- ========== INFORMACIÓN DE EMPRESA (SOLO EMPLEADORES) ========== -->
+                {% if user.perfil.tipo == 'empleador' %}
+                <div class="seccion-title" style="margin-top: 1rem;">
+                    <i class="fas fa-building"></i> Información de la empresa
+                </div>
+
+                <div class="info-row">
+                    <div class="info-label">Empresa:</div>
+                    <div class="info-value" id="empresaText">{{ user.perfil.nombre_empresa|default:"No especificado" }}</div>
+                    <i class="fas fa-pen edit-icon" onclick="abrirModalEditar('nombre_empresa', 'empresaText')"></i>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-label">Rubro:</div>
+                    <div class="info-value" id="rubroText">{{ user.perfil.rubro|default:"No especificado" }}</div>
+                    <i class="fas fa-pen edit-icon" onclick="abrirModalEditar('rubro', 'rubroText')"></i>
+                </div>
+                {% endif %}
+
+                <!-- ========== EXPERIENCIA PROFESIONAL (SOLO TRABAJADORES) ========== -->
+                {% if user.perfil.tipo == 'trabajador' %}
                 <div class="seccion-title" style="margin-top: 1rem;">
                     <i class="fas fa-chart-line"></i> Experiencia profesional
                 </div>
@@ -914,29 +834,18 @@
                 <div class="info-row">
                     <div class="info-label"><i class="fas fa-calendar-alt"></i> Años de exp:</div>
                     <div class="info-value" id="experienciaText">
-                        {% if user.perfil.tipo == 'trabajador' %}
-                            {% if user.perfil.anios_experiencia == 1 %}
-                                1 año
-                            {% elif user.perfil.anios_experiencia > 1 %}
-                                {{ user.perfil.anios_experiencia }} años
-                            {% else %}
-                                Sin experiencia registrada
-                            {% endif %}
+                        {% if user.perfil.anios_experiencia == 1 %}
+                            1 año
+                        {% elif user.perfil.anios_experiencia > 1 %}
+                            {{ user.perfil.anios_experiencia }} años
                         {% else %}
-                            {% if user.perfil.anios_experiencia == 1 %}
-                                1 año en el rubro
-                            {% elif user.perfil.anios_experiencia > 1 %}
-                                {{ user.perfil.anios_experiencia }} años en el rubro
-                            {% else %}
-                                Sin experiencia registrada
-                            {% endif %}
+                            Sin experiencia registrada
                         {% endif %}
                     </div>
                     <i class="fas fa-pen edit-icon" onclick="abrirModalEditarExperiencia()"></i>
                 </div>
 
                 <!-- Badge de nivel según experiencia -->
-                {% if user.perfil.tipo == 'trabajador' %}
                 <div class="experiencia-badge">
                     <div style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
                         <i class="fas fa-trophy" style="font-size: 1.5rem; color: #F59E0B;"></i>
@@ -960,9 +869,8 @@
                         </div>
                     </div>
                 </div>
-                {% endif %}
 
-                <!-- DISPONIBILIDAD -->
+                <!-- ========== DISPONIBILIDAD (SOLO TRABAJADORES) ========== -->
                 <div class="seccion-title" style="margin-top: 1rem;">
                     <i class="fas fa-clock"></i> Disponibilidad
                 </div>
@@ -978,6 +886,19 @@
                     <button class="btn-editar" style="padding: 0.3rem 1rem; font-size: 1rem;" onclick="toggleDisponibilidad()">
                         <i class="fas fa-sync-alt"></i> Cambiar estado
                     </button>
+                </div>
+                {% endif %}
+
+                <!-- ========== DESCRIPCIÓN PERSONAL ========== -->
+                <div class="seccion-title" style="margin-top: 1rem;">
+                    <i class="fas fa-user-circle"></i> Sobre mí
+                </div>
+
+                <div class="info-row">
+                    <div class="info-value" id="descripcionText" style="font-style: italic;">
+                        {{ user.perfil.descripcion_personal|default:"No has añadido una descripción todavía." }}
+                    </div>
+                    <i class="fas fa-pen edit-icon" onclick="abrirModalEditar('descripcion_personal', 'descripcionText')"></i>
                 </div>
             </div>
 
@@ -1043,7 +964,9 @@
                     <div style="text-align: center; padding: 3rem; color: #9CA3AF;">
                         <i class="fa-solid fa-newspaper" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
                         <p>No has publicado nada aún</p>
-                        
+                        <a href="{% url 'publicar_estado' %}" class="btn-editar" style="margin-top: 1rem; display: inline-block;">
+                            <i class="fa-solid fa-plus"></i> Crear mi primera publicación
+                        </a>
                     </div>
                     {% endif %}
                 </div>
@@ -1060,15 +983,15 @@
                 {% for calificacion in calificaciones %}
                 <div class="calificacion-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                        <strong><i class="fas fa-user"></i> {{ calificacion.autor|default:"Usuario" }}</strong>
+                        <strong><i class="fas fa-user"></i> {{ calificacion.calificador.get_full_name|default:calificacion.calificador.username }}</strong>
                         <span style="color: #F59E0B;">
                             {% for i in "12345"|make_list %}
-                                {% if forloop.counter <= calificacion.puntuacion|default:0 %}⭐{% else %}☆{% endif %}
+                                {% if forloop.counter <= calificacion.puntuacion %}⭐{% else %}☆{% endif %}
                             {% endfor %}
                         </span>
                     </div>
                     <p style="margin-top: 0.5rem; color: #475569;">{{ calificacion.comentario|default:"Sin comentario" }}</p>
-                    <small style="color: #94A3B8;"><i class="far fa-calendar-alt"></i> {{ calificacion.fecha|default:"Recientemente" }}</small>
+                    <small style="color: #94A3B8;"><i class="far fa-calendar-alt"></i> {{ calificacion.fecha|date:"d/m/Y" }}</small>
                 </div>
                 {% endfor %}
             {% else %}
@@ -1081,8 +1004,7 @@
         </div>
     </div>
 
-    <!-- ========== MODALES ========== -->
-
+    <!-- ========== MODALES (los mismos que tenías) ========== -->
     <!-- MODAL PARA EDITAR PUBLICACIÓN -->
     <div id="modalEditarPublicacion" class="modal-edit">
         <div class="modal-edit-content">
@@ -1163,7 +1085,7 @@
         </div>
     </div>
 
-    <!-- MODAL COMENTARIOS (con editar/eliminar) -->
+    <!-- MODAL COMENTARIOS -->
     <div id="modalComentarios" class="modal-comentarios">
         <div class="modal-comentarios-content">
             <div style="padding: 0.8rem 1rem; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center;">
@@ -1190,12 +1112,12 @@
                 <input type="text" name="telefono" value="{{ user.perfil.telefono|default:'' }}" placeholder="Teléfono">
                 <input type="text" name="ubicacion" value="{{ user.perfil.ubicacion|default:'' }}" placeholder="Ubicación">
                 {% if user.perfil.tipo == 'trabajador' %}
-                <input type="text" name="oficios" value="{{ user.perfil.oficios|default:'' }}" placeholder="Oficios (ej: Electricista, Plomero)">
-                <textarea rows="3" name="descripcion_personal" placeholder="Describe tu experiencia y habilidades...">{{ user.perfil.descripcion_personal|default:'' }}</textarea>
+                <input type="text" name="oficios" value="{{ user.perfil.oficios|default:'' }}" placeholder="Oficios">
+                <textarea rows="3" name="descripcion_personal" placeholder="Describe tu experiencia...">{{ user.perfil.descripcion_personal|default:'' }}</textarea>
                 {% else %}
                 <input type="text" name="nombre_empresa" value="{{ user.perfil.nombre_empresa|default:'' }}" placeholder="Nombre de la empresa">
-                <input type="text" name="rubro" value="{{ user.perfil.rubro|default:'' }}" placeholder="Rubro de la empresa">
-                <textarea rows="3" name="descripcion_personal" placeholder="Describe tu empresa...">{{ user.perfil.descripcion_personal|default:'' }}</textarea>
+                <input type="text" name="rubro" value="{{ user.perfil.rubro|default:'' }}" placeholder="Rubro">
+                <textarea rows="3" name="descripcion_personal" placeholder="Descripción de la empresa...">{{ user.perfil.descripcion_personal|default:'' }}</textarea>
                 {% endif %}
                 <div class="modal-buttons">
                     <button type="button" onclick="cerrarModalGeneral()">Cancelar</button>
@@ -1223,7 +1145,7 @@
         let currentElementId = null;
         let currentPublicacionId = null;
 
-        // ========== EDICIÓN DE PUBLICACIÓN ==========
+        // Editar publicación
         let editPubId = null;
 
         function abrirModalEditarPublicacion(pubId) {
@@ -1256,46 +1178,34 @@
             const formData = new FormData();
             formData.append('contenido', nuevoContenido);
             const imagenFile = document.getElementById('editPubImagen').files[0];
-            if (imagenFile) {
-                formData.append('imagen', imagenFile);
-            }
-            if (document.getElementById('editPubEliminarImagen').checked) {
-                formData.append('eliminar_imagen', 'true');
-            }
+            if (imagenFile) formData.append('imagen', imagenFile);
+            if (document.getElementById('editPubEliminarImagen').checked) formData.append('eliminar_imagen', 'true');
+
             fetch(`/publicacion/editar/${editPubId}/`, {
                 method: 'POST',
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 body: formData
             }).then(r => r.json()).then(data => {
                 if (data.success) {
-                    // Actualizar contenido en la tarjeta
                     document.getElementById(`contenido-pub-${editPubId}`).innerHTML = nuevoContenido.replace(/\n/g, '<br>');
-                    // Recargar para reflejar cambios de imagen (opcional)
                     location.reload();
-                } else {
-                    alert('Error al guardar cambios');
-                }
+                } else alert('Error al guardar cambios');
             });
         }
 
-        // ========== ELIMINAR PUBLICACIÓN ==========
         function eliminarPublicacion(pubId) {
-            if (confirm('¿Estás seguro de eliminar esta publicación? Esta acción no se puede deshacer.')) {
+            if (confirm('¿Eliminar esta publicación?')) {
                 fetch(`/publicacion/eliminar/${pubId}/`, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': '{{ csrf_token }}' }
                 }).then(r => r.json()).then(data => {
-                    if (data.success) {
-                        const card = document.getElementById(`publicacion-${pubId}`);
-                        card.remove();
-                    } else {
-                        alert('Error al eliminar');
-                    }
+                    if (data.success) document.getElementById(`publicacion-${pubId}`).remove();
+                    else alert('Error al eliminar');
                 });
             }
         }
 
-        // ========== EDICIÓN DE PORTAFOLIO ==========
+        // Editar portafolio
         let editFotoId = null;
 
         function abrirModalEditarPortafolio(id, titulo, descripcion, imagenUrl) {
@@ -1318,27 +1228,20 @@
             const titulo = document.getElementById('editFotoTitulo').value;
             const descripcion = document.getElementById('editFotoDescripcion').value;
             const imagenFile = document.getElementById('editFotoImagen').files[0];
-
             const formData = new FormData();
             formData.append('titulo', titulo);
             formData.append('descripcion', descripcion);
-            if (imagenFile) {
-                formData.append('imagen', imagenFile);
-            }
+            if (imagenFile) formData.append('imagen', imagenFile);
 
             fetch(`/perfil/editar-portafolio/${id}/`, {
                 method: 'POST',
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 body: formData
-            })
-            .then(r => r.json())
-            .then(data => {
+            }).then(r => r.json()).then(data => {
                 if (data.success) {
                     const item = document.querySelector(`.portafolio-item[data-id="${id}"]`);
                     if (item) {
-                        if (data.nueva_imagen) {
-                            item.querySelector('img').src = data.nueva_imagen;
-                        }
+                        if (data.nueva_imagen) item.querySelector('img').src = data.nueva_imagen;
                         let tituloDiv = item.querySelector('.portafolio-titulo');
                         if (titulo && titulo.trim() !== '') {
                             if (!tituloDiv) {
@@ -1347,9 +1250,7 @@
                                 item.appendChild(tituloDiv);
                             }
                             tituloDiv.textContent = titulo;
-                        } else if (tituloDiv) {
-                            tituloDiv.remove();
-                        }
+                        } else if (tituloDiv) tituloDiv.remove();
                         let descDiv = item.querySelector('.portafolio-desc');
                         if (descripcion && descripcion.trim() !== '') {
                             if (!descDiv) {
@@ -1358,18 +1259,13 @@
                                 item.appendChild(descDiv);
                             }
                             descDiv.textContent = descripcion;
-                        } else if (descDiv) {
-                            descDiv.remove();
-                        }
+                        } else if (descDiv) descDiv.remove();
                     }
                     cerrarModalEditarPortafolio();
-                } else {
-                    alert('Error al guardar cambios');
-                }
+                } else alert('Error al guardar cambios');
             });
         }
 
-        // ========== ELIMINAR FOTO DE PORTAFOLIO ==========
         function eliminarFoto(fotoId) {
             if (confirm('¿Eliminar esta foto del portafolio?')) {
                 fetch(`/perfil/eliminar-portafolio/${fotoId}/`, {
@@ -1379,7 +1275,7 @@
             }
         }
 
-        // ========== EDITAR CAMPO SIMPLE (ubicación, teléfono) ==========
+        // Editar campo simple
         function abrirModalEditar(field, elementId) {
             currentField = field;
             currentElementId = elementId;
@@ -1409,17 +1305,9 @@
             });
         }
 
-        // ========== EDITAR EXPERIENCIA ==========
+        // Editar experiencia
         function abrirModalEditarExperiencia() {
-            const experienciaSpan = document.getElementById('experienciaText');
-            let textoExperiencia = experienciaSpan.innerText;
-            let años = 0;
-            if (textoExperiencia.includes('año')) {
-                const match = textoExperiencia.match(/(\d+)/);
-                if (match) años = parseInt(match[0]);
-            }
-            currentField = 'anios_experiencia';
-            currentElementId = 'experienciaText';
+            let años = {{ user.perfil.anios_experiencia|default:0 }};
             document.getElementById('experienciaInput').value = años;
             document.getElementById('modalExperiencia').style.display = 'flex';
         }
@@ -1444,7 +1332,7 @@
             });
         }
 
-        // ========== MODAL GENERAL DE EDICIÓN DE PERFIL ==========
+        // Modal general
         function abrirModalGeneral() {
             document.getElementById('modalGeneral').style.display = 'flex';
         }
@@ -1453,7 +1341,7 @@
             document.getElementById('modalGeneral').style.display = 'none';
         }
 
-        // ========== TOGGLE DISPONIBILIDAD ==========
+        // Toggle disponibilidad
         function toggleDisponibilidad() {
             fetch('/perfil/toggle-disponibilidad/', {
                 method: 'POST',
@@ -1467,7 +1355,7 @@
             });
         }
 
-        // ========== LIKE ==========
+        // Like
         function toggleLike(pubId) {
             fetch(`/like/${pubId}/`, {
                 method: 'POST',
@@ -1480,7 +1368,7 @@
             });
         }
 
-        // ========== COMENTARIOS CON CRUD ==========
+        // Comentarios
         function abrirModalComentarios(pubId) {
             currentPublicacionId = pubId;
             document.getElementById('modalComentarios').style.display = 'flex';
@@ -1496,23 +1384,18 @@
             fetch(`/comentarios/${pubId}/`).then(r => r.json()).then(data => {
                 let html = '';
                 data.comentarios.forEach(c => {
-                    // Se espera que la vista devuelva 'usuario_id' para comparar. Si no, ajusta.
                     const esPropio = (c.usuario_id === {{ user.id }});
-                    html += `
-                        <div class="comentario-item" data-com-id="${c.id}">
-                            <div class="comentario-header">
-                                <strong>${c.usuario}</strong>
-                                <small style="color:#999;">${c.fecha}</small>
-                                ${esPropio ? `
-                                <div class="comentario-acciones">
-                                    <button onclick="editarComentario(${c.id}, '${c.texto.replace(/'/g, "\\'")}', this.parentElement.parentElement.parentElement)" title="Editar"><i class="fas fa-edit"></i></button>
-                                    <button onclick="eliminarComentario(${c.id}, this.parentElement.parentElement.parentElement)" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
-                                </div>
-                                ` : ''}
-                            </div>
-                            <p class="comentario-texto" style="margin-top:0.3rem;">${c.texto}</p>
+                    html += `<div class="comentario-item">
+                        <div class="comentario-header">
+                            <strong>${c.usuario}</strong>
+                            <small style="color:#999;">${c.fecha}</small>
+                            ${esPropio ? `<div class="comentario-acciones">
+                                <button onclick="editarComentario(${c.id}, '${c.texto.replace(/'/g, "\\'")}', this)"><i class="fas fa-edit"></i></button>
+                                <button onclick="eliminarComentario(${c.id}, this)"><i class="fas fa-trash-alt"></i></button>
+                            </div>` : ''}
                         </div>
-                    `;
+                        <p class="comentario-texto">${c.texto}</p>
+                    </div>`;
                 });
                 if (!html) html = '<p style="text-align:center;">No hay comentarios aún</p>';
                 document.getElementById('listaComentarios').innerHTML = html;
@@ -1545,7 +1428,7 @@
                     body: `texto=${encodeURIComponent(nuevoTexto)}`
                 }).then(r => r.json()).then(data => {
                     if (data.success) {
-                        element.querySelector('.comentario-texto').innerText = nuevoTexto;
+                        element.closest('.comentario-item').querySelector('.comentario-texto').innerText = nuevoTexto;
                     }
                 });
             }
@@ -1558,7 +1441,7 @@
                     headers: { 'X-CSRFToken': '{{ csrf_token }}' }
                 }).then(r => r.json()).then(data => {
                     if (data.success) {
-                        element.remove();
+                        element.closest('.comentario-item').remove();
                         const countSpan = document.getElementById(`com-count-${currentPublicacionId}`);
                         if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) - 1;
                     }
@@ -1566,11 +1449,10 @@
             }
         }
 
-        // Exponer funciones globalmente
         window.editarComentario = editarComentario;
         window.eliminarComentario = eliminarComentario;
 
-        // Cerrar modales al hacer clic fuera
+        // Cerrar modales
         document.getElementById('modalGeneral')?.addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModalGeneral(); });
         document.getElementById('modalSimple')?.addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModalSimple(); });
         document.getElementById('modalComentarios')?.addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModalComentarios(); });
@@ -1578,8 +1460,8 @@
         document.getElementById('modalEditarPublicacion')?.addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModalEditarPublicacion(); });
         document.getElementById('modalEditarPortafolio')?.addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModalEditarPortafolio(); });
 
-        // Subir foto de perfil automáticamente
-        document.getElementById('fotoInput')?.addEventListener('change', function () {
+        // Subir foto de perfil
+        document.getElementById('fotoInput')?.addEventListener('change', function() {
             document.getElementById('fotoForm').submit();
         });
     </script>

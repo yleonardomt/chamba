@@ -180,6 +180,13 @@ def reset_password(request, uidb64, token):
 
 def register_view(request):
     if request.method == "POST":
+        print("=== DATOS RECIBIDOS ===")
+        print(f"Rol: {request.POST.get('rol')}")
+        print(f"Descripcion personal: {request.POST.get('descripcion_personal')}")
+        print(f"Oficio: {request.POST.get('oficio')}")
+        print(f"Años experiencia: {request.POST.get('anios_experiencia')}")
+        print("======================")
+        
         username = request.POST.get("email").split("@")[0]
         email = request.POST.get("email")
         password = request.POST.get("password")
@@ -196,16 +203,49 @@ def register_view(request):
             username=username, email=email, password=password, first_name=nombre
         )
 
-        Perfil.objects.create(
+        # ========== CAMPOS SEGÚN EL ROL ==========
+        if rol == "trabajador":
+            # IMPORTANTE: Capturar correctamente la descripción
+            descripcion = request.POST.get("descripcion_personal", "")
+            oficios = request.POST.get("oficio", "")
+            anios_exp = request.POST.get("anios_experiencia", 0)
+            nombre_empresa = ""
+            rubro = ""
+            tipo_guardado = "trabajador"
+            print(f"TRABAJADOR - Descripción guardada: '{descripcion}'")
+            
+        elif rol == "empleador":
+            descripcion = request.POST.get("descripcion_empresa", "")
+            oficios = ""
+            anios_exp = 0
+            nombre_empresa = request.POST.get("nombre_empresa", "")
+            rubro = request.POST.get("rubro", "")
+            tipo_guardado = "empleador"
+            print(f"EMPLEADOR - Descripción guardada: '{descripcion}'")
+            
+        else:  # cliente
+            descripcion = request.POST.get("descripcion_personal", "Usuario cliente de CHAMBA")
+            oficios = ""
+            anios_exp = 0
+            nombre_empresa = ""
+            rubro = ""
+            tipo_guardado = "empleador"  # Cliente se guarda como empleador sin empresa
+            print(f"CLIENTE - Descripción guardada: '{descripcion}'")
+
+        # Crear el perfil
+        perfil = Perfil.objects.create(
             usuario=user,
-            tipo=rol,
+            tipo=tipo_guardado,
             telefono=request.POST.get("telefono", ""),
             ubicacion=request.POST.get("ubicacion", ""),
-            oficios=request.POST.get("oficio", ""),
-            descripcion_personal=request.POST.get("descripcion_personal", ""),
-            nombre_empresa=request.POST.get("nombre_empresa", ""),
-            rubro=request.POST.get("rubro", ""),
+            oficios=oficios,
+            descripcion_personal=descripcion,  # 👈 AQUÍ SE GUARDA LA DESCRIPCIÓN
+            nombre_empresa=nombre_empresa,
+            rubro=rubro,
+            anios_experiencia=anios_exp,
         )
+        
+        print(f"PERFIL CREADO - Descripción final: {perfil.descripcion_personal}")
 
         return redirect("login")
 
@@ -585,25 +625,25 @@ def editar_perfil(request):
 
 @login_required
 def perfil_user(request):
-    from .models import PortafolioFoto
-
+    from .models import PortafolioFoto, Calificacion
+    
+    calificaciones = Calificacion.objects.filter(calificado=request.user).select_related('calificador').order_by('-fecha')[:10]
+    
     context = {
         "portafolio_fotos": (
             PortafolioFoto.objects.filter(trabajador=request.user).order_by("orden")
             if request.user.perfil.tipo == "trabajador"
             else []
         ),
-        "mis_publicaciones": Publicacion.objects.filter(usuario=request.user).order_by(
-            "-fecha_creacion"
-        ),
+        "mis_publicaciones": Publicacion.objects.filter(usuario=request.user).order_by("-fecha_creacion"),
         "ofertas": (
             Oferta.objects.filter(empleador=request.user, activa=True)
             if request.user.perfil.tipo == "empleador"
             else []
         ),
-        "calificaciones": [],
-        "anios_experiencia": request.user.perfil.anios_experiencia
-        or 0,  # 👈 AGREGAR ESTO
+        "calificaciones": calificaciones,
+        "anios_experiencia": request.user.perfil.anios_experiencia or 0,
+        "descripcion_personal": request.user.perfil.descripcion_personal or "No has añadido una descripción todavía.",
     }
     return render(request, "perfil.html", context)
 
